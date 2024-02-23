@@ -1,4 +1,4 @@
-use sea_orm::prelude::Decimal;
+use sea_orm::{prelude::Decimal, Set};
 use serde::{Deserialize, Serialize};
 
 use crate::models::_entities::wallets;
@@ -16,5 +16,16 @@ impl WalletResponse {
             balance: model.balance.clone(),
             status: model.status,
         }
+    }
+}
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UpdateWallet {
+    pub addr: String,
+    pub balance: Decimal,
+}
+
+impl UpdateWallet {
+    pub fn update_balance(&self, model: &mut wallets::ActiveModel) {
+        model.balance = Set(self.balance.clone());
     }
 }

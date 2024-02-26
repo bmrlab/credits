@@ -9,8 +9,8 @@ pub struct ModelResp<T> {
 
 impl<T> ModelResp<T> {
     pub fn success(data: T) -> Self {
-        ModelResp {
-            data: data,
+        Self {
+            data,
             code: 0,
             msg: "success".to_string(),
         }

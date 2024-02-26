@@ -45,7 +45,24 @@ pub async fn update_balance(
         .await?
         .ok_or_else(|| Error::NotFound)?;
     let mut active_model = base.into_active_model();
-    params.update_balance(&mut active_model);
+    params.update_balance(&mut active_model)?;
+    tracing::info!("active---- info {:?}", &active_model);
+    base = active_model.update(&ctx.db).await?;
+    format::json(success(&base))
+}
+
+// 更钱包状态
+pub async fn update_status(
+    State(ctx): State<AppContext>,
+    Json(params): Json<UpdateWallet>,
+) -> Result<Json<ModelResp<WalletResponse>>> {
+    let mut base: wallets::Model = Wallets::find()
+        .filter(wallets::Column::Addr.eq(&params.addr))
+        .one(&ctx.db)
+        .await?
+        .ok_or_else(|| Error::NotFound)?;
+    let mut active_model = base.into_active_model();
+    params.update_state(&mut active_model)?;
     tracing::info!("active---- info {:?}", &active_model);
     base = active_model.update(&ctx.db).await?;
     format::json(success(&base))
@@ -75,6 +92,7 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("wallet")
         .add("/update_balance", post(update_balance))
+        .add("/update_status", post(update_status))
         .add("/", post(create_addr))
         .add("/:addr", get(get_one))
 }

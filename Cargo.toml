@@ -25,6 +25,7 @@ sea-orm = { version = "1.0.0-rc.1", features = [
   "runtime-tokio-rustls",
   "macros",
 ] }
+redis = "0.22.3"
 
 axum = "0.7.1"
 include_dir = "0.7"

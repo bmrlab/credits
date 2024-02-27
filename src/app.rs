@@ -1,8 +1,9 @@
-use std::path::Path;
+use std::{os::unix::thread, path::Path, thread::Thread};
 
 use async_trait::async_trait;
+use axum::handler;
 use loco_rs::{
-    app::{AppContext, Hooks},
+    app::{AppContext, Hooks, Initializer},
     boot::{create_app, BootResult, StartMode},
     controller::AppRoutes,
     environment::Environment,
@@ -13,7 +14,7 @@ use loco_rs::{
 use migration::Migrator;
 use sea_orm::DatabaseConnection;
 
-use crate::controllers;
+use crate::{controllers, initializers};
 
 pub struct App;
 #[async_trait]
@@ -36,11 +37,16 @@ impl Hooks for App {
         create_app::<Self, Migrator>(mode, environment).await
     }
 
-    fn routes(_ctx: &AppContext) -> AppRoutes {
+    fn routes(ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes()
             .add_route(controllers::transaction::routes())
             .prefix("/api")
             .add_route(controllers::wallet::routes())
+    }
+    async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
+        Ok(vec![Box::new(
+            initializers::listen_tran::ListenTranInitializer,
+        )])
     }
 
     fn connect_workers<'a>(_p: &'a mut Processor, _ctx: &'a AppContext) {
@@ -55,5 +61,12 @@ impl Hooks for App {
 
     async fn seed(_db: &DatabaseConnection, _base: &Path) -> Result<()> {
         Ok(())
+    }
+}
+
+fn hello(ctx: &AppContext) {
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(5));
+        println!("Hello, {:?}", ctx.redis);
     }
 }

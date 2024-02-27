@@ -5,6 +5,8 @@ pub mod wallets;
 
 pub mod response;
 
+pub mod transaction;
+
 pub fn params_error(desc: String) -> Error {
     Error::CustomError(
         StatusCode::BAD_REQUEST,

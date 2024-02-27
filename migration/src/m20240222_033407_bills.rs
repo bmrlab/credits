@@ -13,7 +13,13 @@ impl MigrationTrait for Migration {
                     .col(string(Bills::EventId))
                     .col(string_null(Bills::FromAddr))
                     .col(string_null(Bills::ToAddr))
-                    .col(string(Bills::EventType))
+                    .col(string(Bills::EventType).comment(
+                        "- 支付事件：payment
+                    - 转账事件：transfer
+                    - 发放奖励：distribute
+                    - 正常扣款：deduction
+                    - 罚款：fine",
+                    ))
                     .col(tiny_integer(Bills::Direction))
                     .col(decimal_len(Bills::Amount, 22, 2))
                     .col(decimal_len(Bills::CurrentBalance, 22, 2))

@@ -11,7 +11,6 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub event_id: String,
-    pub event_exec_id: String,
     pub from_addr: Option<String>,
     pub to_addr: Option<String>,
     #[sea_orm(column_type = "Decimal(Some((22, 2)))")]

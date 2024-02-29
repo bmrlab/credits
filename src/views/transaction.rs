@@ -21,7 +21,7 @@ impl TransItem {
             event_id: Set(event_id.clone()),
             amount: Set(self.amount.clone()),
             event_type: Set(event_type),
-            info: Set(Some(self.info.clone())),
+            info: Set(Some(json!(self.info.clone()))),
             ..Default::default()
         }
     }

@@ -1,7 +1,6 @@
-use std::{os::unix::thread, path::Path, thread::Thread};
+use std::path::Path;
 
 use async_trait::async_trait;
-use axum::handler;
 use loco_rs::{
     app::{AppContext, Hooks, Initializer},
     boot::{create_app, BootResult, StartMode},
@@ -37,7 +36,7 @@ impl Hooks for App {
         create_app::<Self, Migrator>(mode, environment).await
     }
 
-    fn routes(ctx: &AppContext) -> AppRoutes {
+    fn routes(_ctx: &AppContext) -> AppRoutes {
         AppRoutes::with_default_routes()
             .add_route(controllers::transaction::routes())
             .prefix("/api")
@@ -61,12 +60,5 @@ impl Hooks for App {
 
     async fn seed(_db: &DatabaseConnection, _base: &Path) -> Result<()> {
         Ok(())
-    }
-}
-
-fn hello(ctx: &AppContext) {
-    loop {
-        std::thread::sleep(std::time::Duration::from_secs(5));
-        println!("Hello, {:?}", ctx.redis);
     }
 }

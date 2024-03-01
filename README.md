@@ -16,6 +16,16 @@ cargo install sea-orm-cli
 
 - 项目启动
 
+如果需要本地使用，需要搭建本地 redis，mysql。 并创建数据库。
+
+- 执行表结构生成
+
+```
+cargo loco db migrate
+```
+
+loco 启动项目：
+
 ```
 cargo loco start
 ```

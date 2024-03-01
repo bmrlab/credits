@@ -43,11 +43,11 @@ const ALL_TYPES: [&str; 7] = [
 ];
 
 // 支出
-const PAYMENT: i8 = -1;
+pub const PAYMENT: i8 = -1;
 // 收入
-const INCOME: i8 = 1;
+pub const INCOME: i8 = 1;
 // 复合操作 双向都有
-const COMPLEX: i8 = 0;
+pub const COMPLEX: i8 = 0;
 
 pub fn is_complex_event(event: &str) -> bool {
     return ALL_COMPLEX_TYPES.contains(&event);

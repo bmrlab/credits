@@ -2,7 +2,7 @@ use std::path::Path;
 
 use async_trait::async_trait;
 use loco_rs::{
-    app::{AppContext, Hooks, Initializer},
+    app::{AppContext, Hooks},
     boot::{create_app, BootResult, StartMode},
     controller::AppRoutes,
     environment::Environment,
@@ -13,7 +13,7 @@ use loco_rs::{
 use migration::Migrator;
 use sea_orm::DatabaseConnection;
 
-use crate::{controllers, initializers};
+use crate::controllers;
 
 pub struct App;
 #[async_trait]
@@ -42,11 +42,11 @@ impl Hooks for App {
             .prefix("/api")
             .add_route(controllers::wallet::routes())
     }
-    async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
-        Ok(vec![Box::new(
-            initializers::listen_tran::ListenTranInitializer,
-        )])
-    }
+    // async fn initializers(_ctx: &AppContext) -> Result<Vec<Box<dyn Initializer>>> {
+    //     Ok(vec![Box::new(
+    //         initializers::listen_tran::ListenTranInitializer,
+    //     )])
+    // }
 
     fn connect_workers<'a>(_p: &'a mut Processor, _ctx: &'a AppContext) {
         todo!("connect workers")

@@ -4,6 +4,7 @@ use crate::models::{
 };
 use sea_orm::{prelude::Decimal, Set};
 use serde::{Deserialize, Serialize};
+use serde_json::Value as Json;
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TransItem {
     pub from_addr: String,
@@ -54,6 +55,41 @@ impl RecoveryInExecute {
             amount: Decimal::new(0, 0),
             event_type: TE_TYPE_RECOVERY.to_string(),
             info: self.info.clone(),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct TransactionDetailResp {
+    pub created_at: String,
+    pub id: i32,
+    pub event_id: String,
+    pub from_addr: String,
+    pub to_addr: String,
+    pub amount: Decimal,
+    pub event_type: String,
+    pub direction: i8,
+    pub info: Json,
+    pub status_msg: String,
+}
+
+impl TransactionDetailResp {
+    pub fn new(model: &transaction_events::Model) -> Self {
+        let mut status_msg = "";
+        if let Some(msg) = &model.status_msg {
+            status_msg = msg;
+        };
+        Self {
+            created_at: model.created_at.to_string(),
+            id: model.id,
+            event_id: model.event_id.clone(),
+            from_addr: model.from_addr.clone().unwrap(),
+            to_addr: model.to_addr.clone().unwrap(),
+            amount: model.amount.clone(),
+            event_type: model.event_type.clone(),
+            direction: model.direction,
+            info: model.info.clone().unwrap(),
+            status_msg: status_msg.to_string(),
         }
     }
 }

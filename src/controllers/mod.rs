@@ -11,4 +11,4 @@ pub const LOCK_KEY_TTL: usize = 10;
 // 当前交易信息key 防丢失
 pub const LOCK_TRANSACTION_KEY: &str = "muse:credits-bill:transaction_key_lock";
 
-
+pub mod bill;

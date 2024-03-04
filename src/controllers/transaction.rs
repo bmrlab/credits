@@ -11,7 +11,10 @@ use crate::{
         _entities::{prelude::*, *},
         transaction_event_type::{self, INCOME, PAYMENT, TE_TYPE_RECOVERY},
     },
-    views::transaction::{RecoveryInExecute, TransItem, TransactionResp},
+    views::{
+        response::ModelResp,
+        transaction::{RecoveryInExecute, TransItem, TransactionDetailResp, TransactionResp},
+    },
 };
 
 pub async fn api_exec_recovery(
@@ -29,6 +32,19 @@ pub async fn api_exec_trans(
 ) -> Result<Json<TransactionResp>> {
     let event_id = transation_process(&ctx.db, params).await?;
     format::json(TransactionResp::new(event_id))
+}
+
+pub async fn api_query_event(
+    State(ctx): State<AppContext>,
+    Path(event_id): Path<String>,
+) -> Result<Json<ModelResp<TransactionDetailResp>>> {
+    let model = transaction_events::Entity::find()
+        .filter(transaction_events::Column::EventId.eq(&event_id))
+        .one(&ctx.db)
+        .await?
+        .ok_or_else(|| Error::NotFound)?;
+
+    format::json(ModelResp::success(TransactionDetailResp::new(&model)))
 }
 
 /*
@@ -285,5 +301,6 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("transaction")
         .add("/", post(api_exec_trans))
+        .add("/:event_id", get(api_query_event))
         .add("/recovery", post(api_exec_recovery))
 }

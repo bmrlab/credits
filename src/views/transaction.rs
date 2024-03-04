@@ -1,4 +1,7 @@
-use crate::models::{_entities::transaction_events, transaction_event_type};
+use crate::models::{
+    _entities::transaction_events,
+    transaction_event_type::{self, TE_TYPE_RECOVERY},
+};
 use sea_orm::{prelude::Decimal, Set};
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -33,5 +36,24 @@ pub struct TransactionResp {
 impl TransactionResp {
     pub fn new(event_id: String) -> Self {
         Self { event_id }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct RecoveryInExecute {
+    pub from_addr: String,
+    pub to_addr: String,
+    pub info: serde_json::Value,
+}
+
+impl RecoveryInExecute {
+    pub fn convert_to_trans_item(&self) -> TransItem {
+        TransItem {
+            from_addr: self.from_addr.clone(),
+            to_addr: self.to_addr.clone(),
+            amount: Decimal::new(0, 0),
+            event_type: TE_TYPE_RECOVERY.to_string(),
+            info: self.info.clone(),
+        }
     }
 }

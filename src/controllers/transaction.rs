@@ -9,13 +9,29 @@ use serde_json::json;
 use crate::{
     models::{
         _entities::{prelude::*, *},
-        transaction_event_type::{self, INCOME, PAYMENT},
+        transaction_event_type::{self, INCOME, PAYMENT, TE_TYPE_RECOVERY},
     },
-    views::transaction::{TransItem, TransactionResp},
+    views::transaction::{RecoveryInExecute, TransItem, TransactionResp},
 };
 
-/*
+pub async fn api_exec_recovery(
+    State(ctx): State<AppContext>,
+    Json(params): Json<RecoveryInExecute>,
+) -> Result<Json<TransactionResp>> {
+    let param = params.convert_to_trans_item();
+    let event_id = transation_process(&ctx.db, param).await?;
+    format::json(TransactionResp::new(event_id))
+}
 
+pub async fn api_exec_trans(
+    State(ctx): State<AppContext>,
+    Json(params): Json<TransItem>,
+) -> Result<Json<TransactionResp>> {
+    let event_id = transation_process(&ctx.db, params).await?;
+    format::json(TransactionResp::new(event_id))
+}
+
+/*
 发起交易请求：
 1.获取两个钱包的信息。
 2.判断两个钱包余额是否支持交易，不支持，交易失败，记录事件交易信息。交易结束。
@@ -24,15 +40,15 @@ use crate::{
 5.事件交易信息，两个钱包的账单信息存储。
 6.交易结束。
 */
-pub async fn api_exec_trans(
-    State(ctx): State<AppContext>,
-    Json(params): Json<TransItem>,
-) -> Result<Json<TransactionResp>> {
+async fn transation_process(
+    db: &sea_orm::prelude::DatabaseConnection,
+    params: TransItem,
+) -> Result<String> {
     tracing::info!("发起交易 params: {:?}", &params);
     let params_clone = params.clone();
     let from_addr = params_clone.from_addr;
     let to_addr = params_clone.to_addr;
-    let amount = params_clone.amount;
+    let mut amount = params_clone.amount;
     let events_type = transaction_event_type::split_complex_event(&params_clone.event_type);
     let event_id = get_uuid();
     tracing::info!(
@@ -48,17 +64,26 @@ pub async fn api_exec_trans(
             // let tran = params.new(&event_id);
             let from_wallet = Wallets::find()
                 .filter(wallets::Column::Addr.eq(&from_addr))
-                .one(&ctx.db)
+                .one(db)
                 .await?;
 
             let to_wallet = Wallets::find()
                 .filter(wallets::Column::Addr.eq(&to_addr))
-                .one(&ctx.db)
+                .one(db)
                 .await?;
 
             // 2.判断两个钱包余额是否支持交易，不支持，交易失败，记录事件交易信息。交易结束。
             let mut transaction_active: transaction_events::ActiveModel =
                 build_transaction(&from_wallet, &to_wallet, &params, direction);
+            // 金额回收 逻辑
+            if ele == TE_TYPE_RECOVERY {
+                amount = to_wallet
+                    .as_ref()
+                    .ok_or_else(|| Error::NotFound)?
+                    .balance
+                    .clone();
+                transaction_active.amount = Set(amount.clone());
+            }
             transaction_active.event_id = Set(event_id.clone());
             let state_value = transaction_active.clone().state.as_ref().clone();
 
@@ -69,7 +94,7 @@ pub async fn api_exec_trans(
                     .as_ref()
                     .clone()
                     .ok_or_else(|| Error::NotFound)?;
-                transaction_active.insert(&ctx.db).await?;
+                transaction_active.insert(db).await?;
                 return Err(Error::CustomError(
                     StatusCode::BAD_REQUEST,
                     ErrorDetail::new("bad_request", &msg),
@@ -92,7 +117,7 @@ pub async fn api_exec_trans(
             }
 
             // 4.开始事务：更新钱包余额条件加上原有钱包余额，两个钱包更新余额成功，则提交事务，否则事务回滚，进行交易重试，从1开始
-            let txn = ctx.db.begin().await?;
+            let txn = db.begin().await?;
             let from_res = &txn
                 .execute(Statement::from_sql_and_values(
                     sea_orm::DatabaseBackend::MySql,
@@ -120,7 +145,7 @@ pub async fn api_exec_trans(
                 txn.commit().await?;
                 // 5.事件交易信息，两个钱包的账单信息存储。
                 transaction_active.state = Set(10);
-                transaction_active.insert(&ctx.db).await?;
+                transaction_active.insert(db).await?;
                 let bill_actives = build_bill_actives(
                     &event_id,
                     &from_addr,
@@ -133,7 +158,7 @@ pub async fn api_exec_trans(
                 );
 
                 for bill in bill_actives {
-                    bill.insert(&ctx.db).await?;
+                    bill.insert(db).await?;
                 }
                 // 6.交易结束。
                 tracing::info!("交易成功 event_id: {}", &event_id);
@@ -145,7 +170,8 @@ pub async fn api_exec_trans(
         }
     }
     tracing::info!("交易结束 event_id: {}", &event_id);
-    format::json(TransactionResp::new(event_id))
+
+    Ok(event_id)
 }
 
 fn get_uuid() -> String {
@@ -259,4 +285,5 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("transaction")
         .add("/", post(api_exec_trans))
+        .add("/recovery", post(api_exec_recovery))
 }

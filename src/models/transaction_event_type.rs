@@ -13,7 +13,7 @@ const TE_TYPE_DISTRIBUTE: &str = "distribute";
 const TE_TYPE_DEDUCTION: &str = "deduction";
 
 // # 金额回收
-const TE_TYPE_RECOVERY: &str = "recovery";
+pub const TE_TYPE_RECOVERY: &str = "recovery";
 
 // # 罚款
 const TE_TYPE_FINE: &str = "fine";

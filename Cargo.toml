@@ -32,6 +32,10 @@ include_dir = "0.7"
 uuid = { version = "1.6.0", features = ["v4"] }
 tracing-subscriber = { version = "0.3.17", features = ["env-filter", "json"] }
 
+[dependencies.mongodb]
+version = "2.8.0"
+features = ["tokio-runtime"]
+
 [[bin]]
 name = "muse_integrator-cli"
 path = "src/bin/main.rs"

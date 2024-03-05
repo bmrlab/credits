@@ -46,7 +46,6 @@ pub async fn update_balance(
         .ok_or_else(|| Error::NotFound)?;
     let mut active_model = base.into_active_model();
     params.update_balance(&mut active_model)?;
-    tracing::info!("active---- info {:?}", &active_model);
     base = active_model.update(&ctx.db).await?;
     format::json(success(&base))
 }

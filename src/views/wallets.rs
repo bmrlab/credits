@@ -1,5 +1,6 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unused_async)]
+use chrono::Utc;
 use loco_rs::Result;
 use sea_orm::{prelude::Decimal, Set};
 use serde::{Deserialize, Serialize};
@@ -36,6 +37,7 @@ impl UpdateWallet {
             .balance
             .ok_or_else(|| params_error("balance is null".to_string()))?
             .clone());
+        model.updated_at = Set(Utc::now());
         Ok(())
     }
 
@@ -44,6 +46,7 @@ impl UpdateWallet {
             .status
             .ok_or_else(|| params_error("status is null".to_string()))?
             .clone());
+        model.updated_at = Set(Utc::now());
         Ok(())
     }
 }

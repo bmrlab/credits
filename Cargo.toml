@@ -24,7 +24,6 @@ sea-orm = { version = "1.0.0-rc.1", features = [
   "sqlx-mysql",
   "runtime-tokio-rustls",
   "macros",
-  "debug-print",
 ] }
 redis = "0.22.3"
 

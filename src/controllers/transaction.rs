@@ -1,5 +1,6 @@
 #![allow(clippy::unused_async)]
 use axum::http::StatusCode;
+use chrono::Utc;
 use loco_rs::{controller::ErrorDetail, prelude::*};
 use sea_orm::{
     prelude::Decimal, ColumnTrait, ConnectionTrait, QueryFilter, Statement, TransactionTrait,
@@ -131,15 +132,16 @@ async fn transation_process(
                 from_balance += amount;
                 to_balance -= amount;
             }
-
+            let now = Utc::now();
             // 4.开始事务：更新钱包余额条件加上原有钱包余额，两个钱包更新余额成功，则提交事务，否则事务回滚，进行交易重试，从1开始
             let txn = db.begin().await?;
             let from_res = &txn
                 .execute(Statement::from_sql_and_values(
                     sea_orm::DatabaseBackend::MySql,
-                    "update wallets set balance = ? where addr = ? and balance = ?",
+                    "update wallets set balance = ?, updated_at=? where addr = ? and balance = ?",
                     [
                         from_balance.into(),
+                        now.into(),
                         from_addr.clone().into(),
                         from_wallet_model.balance.into(),
                     ],
@@ -148,9 +150,10 @@ async fn transation_process(
             let to_res = &txn
                 .execute(Statement::from_sql_and_values(
                     sea_orm::DatabaseBackend::MySql,
-                    "update wallets set balance = ? where addr = ? and balance = ?",
+                    "update wallets set balance = ?,  updated_at=?  where addr = ? and balance = ?",
                     [
                         to_balance.into(),
+                        now.into(),
                         to_addr.clone().into(),
                         to_wallet_model.balance.into(),
                     ],
@@ -172,10 +175,7 @@ async fn transation_process(
                     ele,
                     json!({}),
                 );
-
-                for bill in bill_actives {
-                    bill.insert(db).await?;
-                }
+                Bills::insert_many(bill_actives).exec(db).await?;
                 // 6.交易结束。
                 tracing::info!("交易成功 event_id: {}", &event_id);
                 break;

@@ -42,5 +42,5 @@ pub async fn history(
 }
 
 pub fn routes() -> Routes {
-    Routes::new().prefix("bill").add("/", post(history))
+    Routes::new().prefix("bill").add("/history", post(history))
 }

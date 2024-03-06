@@ -11,6 +11,7 @@ pub struct TransItem {
     pub to_addr: String,
     pub amount: Decimal,
     pub event_type: String,
+    pub trace_id: String,
     pub info: serde_json::Value,
 }
 
@@ -22,6 +23,7 @@ impl TransItem {
             from_addr: Set(Some(self.from_addr.clone())),
             to_addr: Set(Some(self.to_addr.clone())),
             amount: Set(self.amount.clone()),
+            trace_id: Set(self.trace_id.clone()),
             state: Set(10),
             event_type: Set(event_type),
             info: Set(Some(self.info.clone())),
@@ -44,6 +46,7 @@ impl TransactionResp {
 pub struct RecoveryInExecute {
     pub from_addr: String,
     pub to_addr: String,
+    pub trace_id: String,
     pub info: serde_json::Value,
 }
 
@@ -53,6 +56,7 @@ impl RecoveryInExecute {
             from_addr: self.from_addr.clone(),
             to_addr: self.to_addr.clone(),
             amount: Decimal::new(0, 0),
+            trace_id: self.trace_id.clone(),
             event_type: TE_TYPE_RECOVERY.to_string(),
             info: self.info.clone(),
         }
@@ -70,6 +74,7 @@ pub struct TransactionDetailResp {
     pub event_type: String,
     pub direction: i8,
     pub info: Json,
+    pub trace_id: String,
     pub status_msg: String,
 }
 
@@ -89,6 +94,7 @@ impl TransactionDetailResp {
             event_type: model.event_type.clone(),
             direction: model.direction,
             info: model.info.clone().unwrap(),
+            trace_id: model.trace_id.clone(),
             status_msg: status_msg.to_string(),
         }
     }

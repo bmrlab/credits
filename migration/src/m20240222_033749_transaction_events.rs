@@ -11,6 +11,7 @@ impl MigrationTrait for Migration {
                 table_auto(TransactionEvents::Table)
                     .col(pk_auto(TransactionEvents::Id))
                     .col(string(TransactionEvents::EventId))
+                    .col(string(TransactionEvents::TraceId))
                     .col(string_null(TransactionEvents::FromAddr))
                     .col(string_null(TransactionEvents::ToAddr))
                     .col(decimal_len(TransactionEvents::Amount, 22, 2).default(0))
@@ -65,4 +66,5 @@ enum TransactionEvents {
     State,
     StatusMsg,
     CallbackUrl,
+    TraceId,
 }

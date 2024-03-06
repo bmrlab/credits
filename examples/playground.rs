@@ -81,7 +81,7 @@ async fn main() -> eyre::Result<()> {
             let info_opt = doc.get("info");
             if let Some(info) = info_opt {
                 if let Bson::Document(v) = info {
-                    tran.info = Set(Some(Json::from(v.clone().to_string())));
+                    tran.info = Set(Some(Json::from_iter(v.clone())));
                 }
             }
 
@@ -89,6 +89,13 @@ async fn main() -> eyre::Result<()> {
             if let Some(v) = account_event_id_opt {
                 if let Bson::String(r) = v {
                     tran.event_id = Set(r.to_string());
+                }
+            }
+
+            let trace_id_id_opt: Option<&Bson> = doc.get("trace_id");
+            if let Some(v) = trace_id_id_opt {
+                if let Bson::String(r) = v {
+                    tran.trace_id = Set(r.to_string());
                 }
             }
 
@@ -103,6 +110,13 @@ async fn main() -> eyre::Result<()> {
             if let Some(v) = callback_url_opt {
                 if let Bson::String(r) = v {
                     tran.callback_url = Set(Some(r.to_string()));
+                }
+            }
+
+            let status_msg_opt = doc.get("status_msg");
+            if let Some(v) = status_msg_opt {
+                if let Bson::String(r) = v {
+                    tran.status_msg = Set(Some(r.to_string()));
                 }
             }
 
@@ -127,22 +141,3 @@ async fn main() -> eyre::Result<()> {
 
     Ok(())
 }
-
-// async fn test() {
-//     // Parse a connection string into an options struct.
-//     let mut client_options = ClientOptions::parse(
-// "",
-//     )
-//     .await?;
-
-//     // Manually set an option.
-//     client_options.app_name = Some("My App".to_string());
-
-//     // Get a handle to the deployment.
-//     let client = Client::with_options(client_options)?;
-
-//     // List the names of the databases in that deployment.
-//     for db_name in client.list_database_names(None, None).await? {
-//         println!("{}", db_name);
-//     }
-// }

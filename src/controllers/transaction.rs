@@ -21,7 +21,9 @@ use crate::{
 pub async fn api_exec_recovery(
     State(ctx): State<AppContext>,
     Json(params): Json<RecoveryInExecute>,
+    // header: HeaderMap<HeaderValue>,
 ) -> Result<Json<TransactionResp>> {
+    // let _a = header.get("trace-id");
     let param = params.convert_to_trans_item();
     let event_id = transation_process(&ctx.db, param).await?;
     format::json(TransactionResp::new(event_id))
@@ -30,7 +32,9 @@ pub async fn api_exec_recovery(
 pub async fn api_exec_trans(
     State(ctx): State<AppContext>,
     Json(params): Json<TransItem>,
+    // Json(header): Json<HeaderMap>,
 ) -> Result<Json<TransactionResp>> {
+    // let _a = header.get("trace-id");
     let event_id = transation_process(&ctx.db, params).await?;
     format::json(TransactionResp::new(event_id))
 }
@@ -38,14 +42,31 @@ pub async fn api_exec_trans(
 pub async fn api_query_event(
     State(ctx): State<AppContext>,
     Path(event_id): Path<String>,
-) -> Result<Json<ModelResp<TransactionDetailResp>>> {
-    let model = transaction_events::Entity::find()
-        .filter(transaction_events::Column::EventId.eq(&event_id))
-        .one(&ctx.db)
-        .await?
-        .ok_or_else(|| Error::NotFound)?;
+) -> Result<Json<ModelResp<Vec<TransactionDetailResp>>>> {
+    let models = transaction_events::Entity::find()
+        .filter(transaction_events::Column::TraceId.eq(&event_id))
+        .all(&ctx.db)
+        .await?;
+    let res = models
+        .iter()
+        .map(|model| TransactionDetailResp::new(model))
+        .collect::<Vec<TransactionDetailResp>>();
+    format::json(ModelResp::success(res))
+}
 
-    format::json(ModelResp::success(TransactionDetailResp::new(&model)))
+pub async fn api_query_event_by_trace_id(
+    State(ctx): State<AppContext>,
+    Path(trace_id): Path<String>,
+) -> Result<Json<ModelResp<Vec<TransactionDetailResp>>>> {
+    let models = transaction_events::Entity::find()
+        .filter(transaction_events::Column::TraceId.eq(&trace_id))
+        .all(&ctx.db)
+        .await?;
+    let res = models
+        .iter()
+        .map(|model| TransactionDetailResp::new(model))
+        .collect::<Vec<TransactionDetailResp>>();
+    format::json(ModelResp::success(res))
 }
 
 /*
@@ -299,8 +320,9 @@ fn build_transaction(
 
 pub fn routes() -> Routes {
     Routes::new()
-        .prefix("transaction")
+        .prefix("trans")
         .add("/", post(api_exec_trans))
         .add("/:event_id", get(api_query_event))
+        .add("/trace/:trace_id", get(api_query_event_by_trace_id))
         .add("/recovery", post(api_exec_recovery))
 }

@@ -19,6 +19,7 @@ pub struct Model {
     pub direction: i8,
     pub info: Option<Json>,
     pub state: i16,
+    pub trace_id: String,
     pub status_msg: Option<String>,
     pub callback_url: Option<String>,
 }

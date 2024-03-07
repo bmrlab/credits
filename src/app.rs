@@ -13,7 +13,7 @@ use loco_rs::{
 use migration::Migrator;
 use sea_orm::DatabaseConnection;
 
-use crate::controllers;
+use crate::{controllers, tasks};
 
 pub struct App;
 #[async_trait]
@@ -53,7 +53,9 @@ impl Hooks for App {
         todo!("connect workers")
     }
 
-    fn register_tasks(_tasks: &mut Tasks) {}
+    fn register_tasks(tasks: &mut Tasks) {
+        tasks.register(tasks::trans_event_process::TransEventProcess);
+    }
 
     async fn truncate(_db: &DatabaseConnection) -> Result<()> {
         Ok(())

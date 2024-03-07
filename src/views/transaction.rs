@@ -11,24 +11,40 @@ pub struct TransItem {
     pub to_addr: String,
     pub amount: Decimal,
     pub event_type: String,
-    pub trace_id: String,
     pub info: serde_json::Value,
 }
 
 impl TransItem {
-    pub fn new(&self) -> transaction_events::ActiveModel {
+    pub fn new(&self, trace_id: String) -> transaction_events::ActiveModel {
         let event_type = self.event_type.clone();
         transaction_event_type::check_event_type(&event_type);
         transaction_events::ActiveModel {
             from_addr: Set(Some(self.from_addr.clone())),
             to_addr: Set(Some(self.to_addr.clone())),
             amount: Set(self.amount.clone()),
-            trace_id: Set(self.trace_id.clone()),
+            trace_id: Set(trace_id.clone()),
             state: Set(10),
             event_type: Set(event_type),
             info: Set(Some(self.info.clone())),
             ..Default::default()
         }
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct TransItemBatchReq {
+    pub trans: Vec<TransItem>,
+    pub trace_id: String,
+    pub callback_url: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TransactionsResp {
+    pub event_ids: Vec<String>,
+}
+impl TransactionsResp {
+    pub fn new(event_ids: Vec<String>) -> Self {
+        Self { event_ids }
     }
 }
 #[derive(Debug, Deserialize, Serialize)]
@@ -56,7 +72,6 @@ impl RecoveryInExecute {
             from_addr: self.from_addr.clone(),
             to_addr: self.to_addr.clone(),
             amount: Decimal::new(0, 0),
-            trace_id: self.trace_id.clone(),
             event_type: TE_TYPE_RECOVERY.to_string(),
             info: self.info.clone(),
         }

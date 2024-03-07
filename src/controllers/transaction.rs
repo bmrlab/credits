@@ -14,29 +14,33 @@ use crate::{
     },
     views::{
         response::ModelResp,
-        transaction::{RecoveryInExecute, TransItem, TransactionDetailResp, TransactionResp},
+        transaction::{
+            RecoveryInExecute, TransItem, TransItemBatchReq, TransactionDetailResp,
+            TransactionsResp,
+        },
     },
 };
 
 pub async fn api_exec_recovery(
     State(ctx): State<AppContext>,
     Json(params): Json<RecoveryInExecute>,
-    // header: HeaderMap<HeaderValue>,
-) -> Result<Json<TransactionResp>> {
-    // let _a = header.get("trace-id");
+) -> Result<Json<TransactionsResp>> {
     let param = params.convert_to_trans_item();
-    let event_id = transation_process(&ctx.db, param).await?;
-    format::json(TransactionResp::new(event_id))
+    let event_id = transation_process(&ctx.db, param, params.trace_id).await?;
+    format::json(TransactionsResp::new(vec![event_id]))
 }
 
-pub async fn api_exec_trans(
+pub async fn api_exec_batch_trans(
     State(ctx): State<AppContext>,
-    Json(params): Json<TransItem>,
-    // Json(header): Json<HeaderMap>,
-) -> Result<Json<TransactionResp>> {
-    // let _a = header.get("trace-id");
-    let event_id = transation_process(&ctx.db, params).await?;
-    format::json(TransactionResp::new(event_id))
+    Json(params): Json<TransItemBatchReq>,
+) -> Result<Json<TransactionsResp>> {
+    let trace_id = params.trace_id;
+    let mut res: Vec<String> = Vec::new();
+    for ele in params.trans {
+        let event_id = transation_process(&ctx.db, ele, trace_id.clone()).await?;
+        res.push(event_id);
+    }
+    format::json(TransactionsResp::new(res))
 }
 
 pub async fn api_query_event(
@@ -81,6 +85,7 @@ pub async fn api_query_event_by_trace_id(
 async fn transation_process(
     db: &sea_orm::prelude::DatabaseConnection,
     params: TransItem,
+    trace_id: String,
 ) -> Result<String> {
     tracing::info!("发起交易 params: {:?}", &params);
     let params_clone = params.clone();
@@ -111,8 +116,13 @@ async fn transation_process(
                 .await?;
 
             // 2.判断两个钱包余额是否支持交易，不支持，交易失败，记录事件交易信息。交易结束。
-            let mut transaction_active: transaction_events::ActiveModel =
-                build_transaction(&from_wallet, &to_wallet, &params, direction);
+            let mut transaction_active: transaction_events::ActiveModel = build_transaction(
+                &from_wallet,
+                &to_wallet,
+                &params,
+                direction,
+                trace_id.clone(),
+            );
             // 金额回收 逻辑
             if ele == TE_TYPE_RECOVERY {
                 amount = to_wallet
@@ -185,6 +195,7 @@ async fn transation_process(
                 txn.commit().await?;
                 // 5.事件交易信息，两个钱包的账单信息存储。
                 transaction_active.state = Set(10);
+                transaction_active.status_msg = Set(Some("success".to_string()));
                 transaction_active.insert(db).await?;
                 let bill_actives = build_bill_actives(
                     &event_id,
@@ -261,8 +272,9 @@ fn build_transaction(
     to_wallet: &Option<wallets::Model>,
     param: &TransItem,
     direction: i8,
+    trace_id: String,
 ) -> transaction_events::ActiveModel {
-    let mut tran_mode_active: transaction_events::ActiveModel = param.new();
+    let mut tran_mode_active: transaction_events::ActiveModel = param.new(trace_id);
     tran_mode_active.direction = Set(direction);
     tran_mode_active.state = Set(0);
 
@@ -321,7 +333,7 @@ fn build_transaction(
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("trans")
-        .add("/", post(api_exec_trans))
+        .add("/", post(api_exec_batch_trans))
         .add("/:event_id", get(api_query_event))
         .add("/trace/:trace_id", get(api_query_event_by_trace_id))
         .add("/recovery", post(api_exec_recovery))

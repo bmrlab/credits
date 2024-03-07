@@ -1,10 +1,13 @@
 #![allow(clippy::unused_async)]
 use axum::http::StatusCode;
 use loco_rs::{controller::ErrorDetail, prelude::*};
-use sea_orm::{prelude::DateTimeUtc, ColumnTrait, Condition, QueryFilter};
+use sea_orm::{ColumnTrait, Condition, QueryFilter};
 
 use crate::{
-    models::_entities::{bills, prelude::Bills},
+    models::{
+        _entities::{bills, prelude::Bills},
+        time_util::string_to_date_time,
+    },
     views::{
         bill::{BillQueryParams, BillResponse},
         response::ModelResp,
@@ -27,8 +30,8 @@ pub async fn history(
     let sql = Bills::find().filter(
         Condition::all()
             .add(bills::Column::FromAddr.eq(&params.addr))
-            .add(bills::Column::CreatedAt.gte(DateTimeUtc::from_timestamp_millis(start_time)))
-            .add(bills::Column::CreatedAt.lte(DateTimeUtc::from_timestamp_millis(end_time))),
+            .add(bills::Column::CreatedAt.gte(string_to_date_time(&start_time)))
+            .add(bills::Column::CreatedAt.lte(string_to_date_time(&end_time))),
     );
     // tracing::info!("sql = {}", &sql.build(DbBackend::MySql).to_string());
     let bill_res = sql.all(&ctx.db).await?;

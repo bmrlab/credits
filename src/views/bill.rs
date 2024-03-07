@@ -6,8 +6,8 @@ use crate::models::{_entities::bills, time_util};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BillQueryParams {
     pub addr: String,
-    pub start_time: i64,
-    pub end_time: i64,
+    pub start_time: String,
+    pub end_time: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -19,6 +19,7 @@ pub struct BillResponse {
     pub amount: Decimal,
     pub event_type: String,
     pub created_at: DateTimeUtc,
+    pub direction: i8,
     pub info: serde_json::Value,
 }
 
@@ -30,6 +31,7 @@ impl BillResponse {
             from_addr: model.from_addr.clone().unwrap(),
             to_addr: model.to_addr.clone().unwrap(),
             amount: model.amount.clone(),
+            direction: model.direction.clone(),
             event_type: model.event_type.clone(),
             info: model.info.clone().unwrap(),
             created_at: time_util::gtm_time(model.created_at.clone()),

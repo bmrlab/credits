@@ -1,5 +1,7 @@
 #![allow(clippy::unused_async)]
-use axum::http::StatusCode;
+use std::collections::HashMap;
+
+use axum::{extract::Query, http::StatusCode};
 use chrono::Utc;
 use loco_rs::{controller::ErrorDetail, prelude::*};
 use sea_orm::{
@@ -13,6 +15,7 @@ use crate::{
         transaction_event_type::{self, INCOME, PAYMENT, TE_TYPE_RECOVERY},
     },
     views::{
+        params_error,
         response::ModelResp,
         transaction::{
             RecoveryInExecute, TransItem, TransItemBatchReq, TransactionDetailResp,
@@ -24,29 +27,33 @@ use crate::{
 pub async fn api_exec_recovery(
     State(ctx): State<AppContext>,
     Json(params): Json<RecoveryInExecute>,
-) -> Result<Json<TransactionsResp>> {
+) -> Result<Json<ModelResp<TransactionsResp>>> {
     let param = params.convert_to_trans_item();
     let event_id = transation_process(&ctx.db, param, params.trace_id).await?;
-    format::json(TransactionsResp::new(vec![event_id]))
+    format::json(ModelResp::success(TransactionsResp::new(vec![event_id])))
 }
 
 pub async fn api_exec_batch_trans(
     State(ctx): State<AppContext>,
     Json(params): Json<TransItemBatchReq>,
-) -> Result<Json<TransactionsResp>> {
+) -> Result<Json<ModelResp<TransactionsResp>>> {
     let trace_id = params.trace_id;
     let mut res: Vec<String> = Vec::new();
     for ele in params.trans {
         let event_id = transation_process(&ctx.db, ele, trace_id.clone()).await?;
         res.push(event_id);
     }
-    format::json(TransactionsResp::new(res))
+    format::json(ModelResp::success(TransactionsResp::new(res)))
 }
 
 pub async fn api_query_event(
     State(ctx): State<AppContext>,
-    Path(event_id): Path<String>,
+    Query(map): Query<HashMap<String, String>>,
 ) -> Result<Json<ModelResp<Vec<TransactionDetailResp>>>> {
+    let event_id = map
+        .get("event_id")
+        .ok_or_else(|| params_error("event_id is empty".to_string()))?
+        .clone();
     let models = transaction_events::Entity::find()
         .filter(transaction_events::Column::TraceId.eq(&event_id))
         .all(&ctx.db)
@@ -60,8 +67,12 @@ pub async fn api_query_event(
 
 pub async fn api_query_event_by_trace_id(
     State(ctx): State<AppContext>,
-    Path(trace_id): Path<String>,
+    Query(map): Query<HashMap<String, String>>,
 ) -> Result<Json<ModelResp<Vec<TransactionDetailResp>>>> {
+    let trace_id = map
+        .get("trace_id")
+        .ok_or_else(|| params_error("trace_id is empty".to_string()))?
+        .clone();
     let models = transaction_events::Entity::find()
         .filter(transaction_events::Column::TraceId.eq(&trace_id))
         .all(&ctx.db)
@@ -334,7 +345,7 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("trans")
         .add("/", post(api_exec_batch_trans))
-        .add("/:event_id", get(api_query_event))
-        .add("/trace/:trace_id", get(api_query_event_by_trace_id))
+        .add("/", get(api_query_event))
+        .add("/trace", get(api_query_event_by_trace_id))
         .add("/recovery", post(api_exec_recovery))
 }

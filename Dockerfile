@@ -1,6 +1,6 @@
 FROM ghcr.io/bmrlab/muse-credits:60d6f13 as github-credits
 
-ENV task_params=" " start_params=" "
+# ENV task_params=" " start_params=" "
 
 COPY --from=github-credits /usr/app/config /usr/app/config
 

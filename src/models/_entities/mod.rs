@@ -2,6 +2,6 @@
 
 pub mod prelude;
 
-pub mod bills;
+pub mod bill;
 pub mod transaction_events;
 pub mod wallets;

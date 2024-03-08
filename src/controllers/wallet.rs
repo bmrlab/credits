@@ -1,19 +1,28 @@
 #![allow(clippy::missing_errors_doc)]
 #![allow(clippy::unused_async)]
+use std::collections::HashMap;
+
 use crate::models::_entities::prelude::*;
 use crate::models::_entities::wallets;
+use crate::views::params_error;
 use crate::views::response::ModelResp;
 use crate::views::wallets::UpdateWallet;
 use crate::views::wallets::WalletResponse;
+use axum::extract::Query;
 use loco_rs::prelude::*;
 use sea_orm::prelude::Decimal;
 use sea_orm::{ColumnTrait, QueryFilter};
 
 // 获取钱包信息
 pub async fn get_one(
-    Path(addr): Path<String>,
+    Query(map): Query<HashMap<String, String>>,
     State(ctx): State<AppContext>,
 ) -> Result<Json<ModelResp<WalletResponse>>> {
+    println!("map = {:?}", &map);
+    let addr = map
+        .get("addr")
+        .ok_or_else(|| params_error("addr is empty".to_string()))?
+        .clone();
     let base = Wallets::find()
         .filter(wallets::Column::Addr.eq(&addr))
         .one(&ctx.db)
@@ -45,7 +54,23 @@ pub async fn update_balance(
         .await?
         .ok_or_else(|| Error::NotFound)?;
     let mut active_model = base.into_active_model();
-    params.update_balance(&mut active_model);
+    params.update_balance(&mut active_model)?;
+    base = active_model.update(&ctx.db).await?;
+    format::json(success(&base))
+}
+
+// 更钱包状态
+pub async fn update_status(
+    State(ctx): State<AppContext>,
+    Json(params): Json<UpdateWallet>,
+) -> Result<Json<ModelResp<WalletResponse>>> {
+    let mut base: wallets::Model = Wallets::find()
+        .filter(wallets::Column::Addr.eq(&params.addr))
+        .one(&ctx.db)
+        .await?
+        .ok_or_else(|| Error::NotFound)?;
+    let mut active_model = base.into_active_model();
+    params.update_state(&mut active_model)?;
     tracing::info!("active---- info {:?}", &active_model);
     base = active_model.update(&ctx.db).await?;
     format::json(success(&base))
@@ -75,6 +100,7 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("wallet")
         .add("/update_balance", post(update_balance))
+        .add("/update_status", post(update_status))
         .add("/", post(create_addr))
-        .add("/:addr", get(get_one))
+        .add("/", get(get_one))
 }

@@ -1,6 +1,12 @@
 FROM rust:1.74-slim as builder
 
 WORKDIR /usr/src/
+RUN mkdir ~/.cargo/ && touch ~/.cargo/config \
+    && echo '[source.crates-io]' > ~/.cargo/config \
+    && echo "replace-with = 'mirror'"  >> ~/.cargo/config \
+    && echo '[source.mirror]' > ~/.cargo/config \
+    && echo 'registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"'  >> ~/.cargo/config 
+
 
 COPY . .
 

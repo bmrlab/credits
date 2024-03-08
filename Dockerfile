@@ -15,5 +15,5 @@ WORKDIR /usr/app
 
 COPY --from=builder /usr/src/config /usr/app/config
 COPY --from=builder /usr/src/target/release/credits-cli /usr/app/credits-cli
-
+EXPOSE 8080
 CMD ["sh", "-c", "cd /usr/app && ./credits-cli task ${task_params} && ${start_params} ./credits-cli start"]

@@ -19,7 +19,7 @@ server:
   # Port on which the server will listen. the server binding is 0.0.0.0:{PORT}
   port: 8081
   # The UI hostname or IP address that mailers will point to.
-  host: http://localhost
+  host: http://127.0.0.1
   # Out of the box middleware configuration. to disable middleware you can changed the `enable` field to `false` of comment the middleware block
   middlewares:
     # Enable Etag cache header middleware
@@ -62,7 +62,7 @@ server:
 # Database Configuration
 database:
   # Database connection URI
-  uri: {{ get_env(name="DATABASE_URL", default="mysql://root:123456@localhost:3306/muse_integrator") }}
+  uri: {{ get_env(name="DATABASE_URL", default="mysql://root:123456@192.168.20.44:3306/muse_integrator") }}
   # When enabled, the sql query will be logged.
   enable_logging: false
   # Set the timeout duration when acquiring a connection.
@@ -83,7 +83,7 @@ database:
 # Redis Configuration
 redis:
   # Redis connection URI
-  uri: {{ get_env(name="REDIS_URL", default="redis://127.0.0.1") }}
+  uri: {{ get_env(name="REDIS_URL", default="redis://192.168.20.44") }}
   # Dangerously flush all data in Redis on startup. dangerous operation, make sure that you using this flag only on dev environments or test mode
   dangerously_flush: false
 

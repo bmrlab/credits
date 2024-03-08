@@ -1,8 +1,8 @@
-use loco_rs::testing;
-use muse_integrator::{
+use credits::{
     app::App,
     models::_entities::{prelude::*, *},
 };
+use loco_rs::testing;
 use sea_orm::{prelude::Decimal, ColumnTrait, EntityTrait, QueryFilter};
 use serial_test::serial;
 

@@ -13,6 +13,6 @@ RUN apt-get update && apt-get install -y libc6
 WORKDIR /usr/app
 
 COPY --from=builder /usr/src/config /usr/app/config
-COPY --from=builder /usr/src/target/release/muse_integrator-cli /usr/app/muse_integrator-cli
+COPY --from=builder /usr/src/target/release/credits-cli /usr/app/credits-cli
 
-ENTRYPOINT ["/usr/app/muse_integrator-cli"]
+ENTRYPOINT ["/usr/app/credits-cli"]

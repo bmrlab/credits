@@ -1,14 +1,14 @@
 use chrono::{TimeZone, Utc};
+use credits::{
+    app::App,
+    models::_entities::transaction_events::{self},
+};
 use eyre::Context;
 #[allow(unused_imports)]
 use loco_rs::{cli::playground, prelude::*};
 use mongodb::{
     bson::{Bson, Document},
     Client, Collection,
-};
-use muse_integrator::{
-    app::App,
-    models::_entities::transaction_events::{self},
 };
 use sea_orm::prelude::Decimal;
 use serde_json::Value as Json;

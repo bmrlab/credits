@@ -1,4 +1,4 @@
-use muse_integrator::app::App;
+use credits::app::App;
 use loco_rs::testing;
 use serial_test::serial;
 

@@ -2,9 +2,9 @@ name: YUM Backend Rust Server
 
 on:
   push:
-    branches: [ "main" ]
-    # tags:
-    #   - v*
+    # branches: [ "main" ]
+    tags:
+      - v*
   workflow_dispatch: {}
 
 jobs:

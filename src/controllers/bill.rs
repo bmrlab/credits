@@ -5,7 +5,7 @@ use sea_orm::{ColumnTrait, Condition, QueryFilter};
 
 use crate::{
     models::{
-        _entities::{bills, prelude::Bills},
+        _entities::{bill, prelude::Bills},
         time_util::string_to_date_time,
     },
     views::{
@@ -29,9 +29,9 @@ pub async fn history(
 
     let sql = Bills::find().filter(
         Condition::all()
-            .add(bills::Column::FromAddr.eq(&params.addr))
-            .add(bills::Column::CreatedAt.gte(string_to_date_time(&start_time)))
-            .add(bills::Column::CreatedAt.lte(string_to_date_time(&end_time))),
+            .add(bill::Column::FromAddr.eq(&params.addr))
+            .add(bill::Column::CreatedAt.gte(string_to_date_time(&start_time)))
+            .add(bill::Column::CreatedAt.lte(string_to_date_time(&end_time))),
     );
     // tracing::info!("sql = {}", &sql.build(DbBackend::MySql).to_string());
     let bill_res = sql.all(&ctx.db).await?;

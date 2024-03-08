@@ -1,7 +1,7 @@
 use sea_orm::prelude::{DateTimeUtc, Decimal};
 use serde::{Deserialize, Serialize};
 
-use crate::models::{_entities::bills, time_util};
+use crate::models::{_entities::bill, time_util};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BillQueryParams {
@@ -24,7 +24,7 @@ pub struct BillResponse {
 }
 
 impl BillResponse {
-    pub fn new(model: &bills::Model) -> Self {
+    pub fn new(model: &bill::Model) -> Self {
         Self {
             id: model.id,
             event_id: model.event_id.clone(),

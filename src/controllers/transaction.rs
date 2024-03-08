@@ -247,9 +247,9 @@ fn build_bill_actives(
     amount: Decimal,
     event_type: &str,
     info: serde_json::Value,
-) -> Vec<bills::ActiveModel> {
+) -> Vec<bill::ActiveModel> {
     let mut bill_actives = vec![];
-    let from_bill = bills::ActiveModel {
+    let from_bill = bill::ActiveModel {
         event_id: Set(event_id.to_string()),
         from_addr: Set(Some(from_addr.to_string())),
         to_addr: Set(Some(to_addr.to_string())),
@@ -260,7 +260,7 @@ fn build_bill_actives(
         info: Set(Some(info.clone())),
         ..Default::default()
     };
-    let to_bill = bills::ActiveModel {
+    let to_bill = bill::ActiveModel {
         event_id: Set(event_id.to_string()),
         from_addr: Set(Some(to_addr.to_string())),
         to_addr: Set(Some(from_addr.to_string())),

@@ -1,5 +1,5 @@
 pub mod _entities;
-pub mod bills;
+pub mod bill;
 pub mod time_util;
 pub mod transaction_event_type;
 pub mod transaction_events;

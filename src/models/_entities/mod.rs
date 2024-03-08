@@ -4,4 +4,4 @@ pub mod prelude;
 
 pub mod bill;
 pub mod transaction_events;
-pub mod wallets;
+pub mod wallet;

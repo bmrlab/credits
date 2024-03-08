@@ -117,12 +117,12 @@ async fn transation_process(
             // 1.获取两个钱包的信息。
             // let tran = params.new(&event_id);
             let from_wallet = Wallets::find()
-                .filter(wallets::Column::Addr.eq(&from_addr))
+                .filter(wallet::Column::Addr.eq(&from_addr))
                 .one(db)
                 .await?;
 
             let to_wallet = Wallets::find()
-                .filter(wallets::Column::Addr.eq(&to_addr))
+                .filter(wallet::Column::Addr.eq(&to_addr))
                 .one(db)
                 .await?;
 
@@ -279,8 +279,8 @@ fn build_bill_actives(
 }
 
 fn build_transaction(
-    from_wallet: &Option<wallets::Model>,
-    to_wallet: &Option<wallets::Model>,
+    from_wallet: &Option<wallet::Model>,
+    to_wallet: &Option<wallet::Model>,
     param: &TransItem,
     direction: i8,
     trace_id: String,

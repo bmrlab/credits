@@ -5,7 +5,7 @@ use loco_rs::Result;
 use sea_orm::{prelude::Decimal, Set};
 use serde::{Deserialize, Serialize};
 
-use crate::models::_entities::wallets;
+use crate::models::_entities::wallet;
 
 use super::params_error;
 
@@ -16,7 +16,7 @@ pub struct WalletResponse {
     pub status: i8,
 }
 impl WalletResponse {
-    pub fn new(model: &wallets::Model) -> Self {
+    pub fn new(model: &wallet::Model) -> Self {
         Self {
             addr: model.addr.clone(),
             balance: model.balance.clone(),
@@ -32,7 +32,7 @@ pub struct UpdateWallet {
 }
 
 impl UpdateWallet {
-    pub fn update_balance(&self, model: &mut wallets::ActiveModel) -> Result<()> {
+    pub fn update_balance(&self, model: &mut wallet::ActiveModel) -> Result<()> {
         model.balance = Set(self
             .balance
             .ok_or_else(|| params_error("balance is null".to_string()))?
@@ -41,7 +41,7 @@ impl UpdateWallet {
         Ok(())
     }
 
-    pub fn update_state(&self, model: &mut wallets::ActiveModel) -> Result<()> {
+    pub fn update_state(&self, model: &mut wallet::ActiveModel) -> Result<()> {
         model.status = Set(self
             .status
             .ok_or_else(|| params_error("status is null".to_string()))?

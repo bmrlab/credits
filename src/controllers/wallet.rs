@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 
 use crate::models::_entities::prelude::*;
-use crate::models::_entities::wallets;
+use crate::models::_entities::wallet;
 use crate::views::params_error;
 use crate::views::response::ModelResp;
 use crate::views::wallets::UpdateWallet;
@@ -24,7 +24,7 @@ pub async fn get_one(
         .ok_or_else(|| params_error("addr is empty".to_string()))?
         .clone();
     let base = Wallets::find()
-        .filter(wallets::Column::Addr.eq(&addr))
+        .filter(wallet::Column::Addr.eq(&addr))
         .one(&ctx.db)
         .await?
         .ok_or_else(|| Error::NotFound)?;
@@ -33,7 +33,7 @@ pub async fn get_one(
 
 // 创建钱包
 pub async fn create_addr(State(ctx): State<AppContext>) -> Result<Json<ModelResp<WalletResponse>>> {
-    let active_model = wallets::ActiveModel {
+    let active_model = wallet::ActiveModel {
         addr: Set(get_addr()),
         balance: Set(Decimal::new(0, 2)),
         status: Set(1),
@@ -48,8 +48,8 @@ pub async fn update_balance(
     State(ctx): State<AppContext>,
     Json(params): Json<UpdateWallet>,
 ) -> Result<Json<ModelResp<WalletResponse>>> {
-    let mut base: wallets::Model = Wallets::find()
-        .filter(wallets::Column::Addr.eq(&params.addr))
+    let mut base: wallet::Model = Wallets::find()
+        .filter(wallet::Column::Addr.eq(&params.addr))
         .one(&ctx.db)
         .await?
         .ok_or_else(|| Error::NotFound)?;
@@ -64,8 +64,8 @@ pub async fn update_status(
     State(ctx): State<AppContext>,
     Json(params): Json<UpdateWallet>,
 ) -> Result<Json<ModelResp<WalletResponse>>> {
-    let mut base: wallets::Model = Wallets::find()
-        .filter(wallets::Column::Addr.eq(&params.addr))
+    let mut base: wallet::Model = Wallets::find()
+        .filter(wallet::Column::Addr.eq(&params.addr))
         .one(&ctx.db)
         .await?
         .ok_or_else(|| Error::NotFound)?;
@@ -76,7 +76,7 @@ pub async fn update_status(
     format::json(success(&base))
 }
 
-fn success(base: &wallets::Model) -> ModelResp<WalletResponse> {
+fn success(base: &wallet::Model) -> ModelResp<WalletResponse> {
     ModelResp::success(WalletResponse::new(base))
 }
 

@@ -4,7 +4,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "wallets")]
+#[sea_orm(table_name = "wallet")]
 pub struct Model {
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,

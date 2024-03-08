@@ -2,4 +2,4 @@
 
 pub use super::bill::Entity as Bills;
 pub use super::transaction_events::Entity as TransactionEvents;
-pub use super::wallets::Entity as Wallets;
+pub use super::wallet::Entity as Wallets;

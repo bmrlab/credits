@@ -9,11 +9,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .create_table(
-                table_auto(Wallets::Table)
-                    .col(pk_auto(Wallets::Id))
-                    .col(string(Wallets::Addr))
-                    .col(decimal_len(Wallets::Balance, 22, 2))
-                    .col(bool(Wallets::Status))
+                table_auto(Wallet::Table)
+                    .col(pk_auto(Wallet::Id))
+                    .col(string(Wallet::Addr))
+                    .col(decimal_len(Wallet::Balance, 22, 2))
+                    .col(bool(Wallet::Status))
                     .to_owned(),
             )
             .await
@@ -21,13 +21,13 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Wallets::Table).to_owned())
+            .drop_table(Table::drop().table(Wallet::Table).to_owned())
             .await
     }
 }
 
 #[derive(DeriveIden)]
-enum Wallets {
+enum Wallet {
     Table,
     Id,
     Addr,

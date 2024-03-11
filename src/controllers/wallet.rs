@@ -36,7 +36,7 @@ pub async fn create_addr(State(ctx): State<AppContext>) -> Result<Json<ModelResp
     let active_model = wallet::ActiveModel {
         addr: Set(get_addr()),
         balance: Set(Decimal::new(0, 2)),
-        status: Set(1),
+        state: Set(1),
         ..Default::default()
     };
     let base = active_model.insert(&ctx.db).await?;

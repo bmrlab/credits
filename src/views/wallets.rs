@@ -13,14 +13,14 @@ use super::params_error;
 pub struct WalletResponse {
     pub addr: String,
     pub balance: Decimal,
-    pub status: i8,
+    pub state: i8,
 }
 impl WalletResponse {
     pub fn new(model: &wallet::Model) -> Self {
         Self {
             addr: model.addr.clone(),
             balance: model.balance.clone(),
-            status: model.status,
+            state: model.state,
         }
     }
 }
@@ -28,7 +28,7 @@ impl WalletResponse {
 pub struct UpdateWallet {
     pub addr: String,
     pub balance: Option<Decimal>,
-    pub status: Option<i8>,
+    pub state: Option<i8>,
 }
 
 impl UpdateWallet {
@@ -42,8 +42,8 @@ impl UpdateWallet {
     }
 
     pub fn update_state(&self, model: &mut wallet::ActiveModel) -> Result<()> {
-        model.status = Set(self
-            .status
+        model.state = Set(self
+            .state
             .ok_or_else(|| params_error("status is null".to_string()))?
             .clone());
         model.updated_at = Set(Utc::now());

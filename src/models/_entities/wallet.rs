@@ -13,7 +13,7 @@ pub struct Model {
     pub addr: String,
     #[sea_orm(column_type = "Decimal(Some((22, 2)))")]
     pub balance: Decimal,
-    pub status: i8,
+    pub state: i8,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

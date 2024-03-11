@@ -300,7 +300,7 @@ fn build_transaction(
     }
     // 校验from_addr 钱包可用性
     if let Some(v) = from_wallet {
-        if v.status == -1 {
+        if v.state == -1 {
             tran_mode_active.state = Set(-1);
             tran_mode_active.status_msg = Set(Some(format!("钱包: {} 不可用", from_addr)));
             return tran_mode_active;
@@ -320,7 +320,7 @@ fn build_transaction(
 
     // 校验to_addr 钱包可用性
     if let Some(v) = to_wallet {
-        if v.status == -1 {
+        if v.state == -1 {
             tran_mode_active.state = Set(-1);
             tran_mode_active.status_msg = Set(Some(format!("钱包: {} 不可用", to_addr)));
             return tran_mode_active;

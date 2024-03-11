@@ -13,7 +13,7 @@ impl MigrationTrait for Migration {
                     .col(pk_auto(Wallet::Id))
                     .col(string(Wallet::Addr))
                     .col(decimal_len(Wallet::Balance, 22, 2))
-                    .col(bool(Wallet::Status))
+                    .col(bool(Wallet::State))
                     .to_owned(),
             )
             .await
@@ -32,5 +32,5 @@ enum Wallet {
     Id,
     Addr,
     Balance,
-    Status,
+    State,
 }

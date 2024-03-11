@@ -1,4 +1,4 @@
-FROM ghcr.io/bmrlab/muse-credits:v0.4 as github-credits
+FROM ghcr.io/bmrlab/muse-credits:v0.5 as github-credits
 
 ENV start_params=" "
 

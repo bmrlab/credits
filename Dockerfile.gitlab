@@ -4,11 +4,13 @@ WORKDIR /usr/src/
 
 COPY . .
 
+RUN apt-get install -y libssl-dev && apt-get -y install pkg-config
+
 RUN cargo build --release
 
 FROM debian:bookworm-slim
 
-RUN apt-get update && apt-get install -y libc6 && apt-get install -y libssl-dev && apt-get -y install pkg-config
+RUN apt-get update && apt-get install -y libc6 
 
 WORKDIR /usr/app
 

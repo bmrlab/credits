@@ -4,7 +4,7 @@ use sea_orm_migration::prelude::*;
 pub struct Migration;
 
 #[derive(DeriveIden)]
-enum Wallets {
+enum Wallet {
     Table,
     Addr,
 }
@@ -48,8 +48,8 @@ impl MigrationTrait for Migration {
             .create_index(
                 Index::create()
                     .name("idx-addr")
-                    .table(Wallets::Table)
-                    .col(Wallets::Addr)
+                    .table(Wallet::Table)
+                    .col(Wallet::Addr)
                     .to_owned(),
             )
             .await

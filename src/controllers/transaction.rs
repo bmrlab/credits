@@ -180,7 +180,7 @@ async fn transation_process(
             let from_res = &txn
                 .execute(Statement::from_sql_and_values(
                     sea_orm::DatabaseBackend::MySql,
-                    "update wallets set balance = ?, updated_at=? where addr = ? and balance = ?",
+                    "update wallet set balance = ?, updated_at=? where addr = ? and balance = ?",
                     [
                         from_balance.into(),
                         now.into(),
@@ -192,7 +192,7 @@ async fn transation_process(
             let to_res = &txn
                 .execute(Statement::from_sql_and_values(
                     sea_orm::DatabaseBackend::MySql,
-                    "update wallets set balance = ?,  updated_at=?  where addr = ? and balance = ?",
+                    "update wallet set balance = ?,  updated_at=?  where addr = ? and balance = ?",
                     [
                         to_balance.into(),
                         now.into(),

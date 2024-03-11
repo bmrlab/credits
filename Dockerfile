@@ -19,7 +19,7 @@ RUN cargo build --release
 
 FROM debian:bookworm-slim
 
-RUN apt-get update && apt-get install -y libc6 && apt-get install -y libssl-dev pkg-config
+RUN apt-get update && apt-get install -y libc6 libssl-dev pkg-config
 
 WORKDIR /usr/app
 

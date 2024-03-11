@@ -12,14 +12,14 @@ async fn can_get_transaction() {
     testing::request::<App, _, _>(|request, ctx| async move {
         let from_addr = "0xf81dd4f427a6d74e73bfe1235a5202abb706b825";
         let to_addr = "0xd43f66c452ffabff8aea9cd5d2d9e8c3577363f5";
-        let from_add_active = Wallets::find()
+        let from_add_active = Wallet::find()
             .filter(wallet::Column::Addr.eq(from_addr))
             .one(&ctx.db)
             .await
             .expect("find wallet failed")
             .expect("wallet not found");
 
-        let to_add_active = Wallets::find()
+        let to_add_active = Wallet::find()
             .filter(wallet::Column::Addr.eq(to_addr))
             .one(&ctx.db)
             .await
@@ -35,14 +35,14 @@ async fn can_get_transaction() {
         });
         let res = request.post("/api/transaction").json(&payload).await;
 
-        let from_add_active_after = Wallets::find()
+        let from_add_active_after = Wallet::find()
             .filter(wallet::Column::Addr.eq(from_addr))
             .one(&ctx.db)
             .await
             .expect("find wallet failed")
             .expect("wallet not found");
 
-        let to_add_active_after = Wallets::find()
+        let to_add_active_after = Wallet::find()
             .filter(wallet::Column::Addr.eq(to_addr))
             .one(&ctx.db)
             .await
@@ -68,14 +68,14 @@ async fn can_recovery() {
     testing::request::<App, _, _>(|request, ctx| async move {
         let from_addr = "0xf81dd4f427a6d74e73bfe1235a5202abb706b825";
         let to_addr = "0xd43f66c452ffabff8aea9cd5d2d9e8c3577363f5";
-        let from_add_active = Wallets::find()
+        let from_add_active = Wallet::find()
             .filter(wallet::Column::Addr.eq(from_addr))
             .one(&ctx.db)
             .await
             .expect("find wallet failed")
             .expect("wallet not found");
 
-        let to_add_active = Wallets::find()
+        let to_add_active = Wallet::find()
             .filter(wallet::Column::Addr.eq(to_addr))
             .one(&ctx.db)
             .await
@@ -92,14 +92,14 @@ async fn can_recovery() {
             .json(&payload)
             .await;
         assert_eq!(res.status_code(), 200);
-        let from_add_active_after = Wallets::find()
+        let from_add_active_after = Wallet::find()
             .filter(wallet::Column::Addr.eq(from_addr))
             .one(&ctx.db)
             .await
             .expect("find wallet failed")
             .expect("wallet not found");
 
-        let to_add_active_after = Wallets::find()
+        let to_add_active_after = Wallet::find()
             .filter(wallet::Column::Addr.eq(to_addr))
             .one(&ctx.db)
             .await

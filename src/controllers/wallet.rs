@@ -23,7 +23,7 @@ pub async fn get_one(
         .get("addr")
         .ok_or_else(|| params_error("addr is empty".to_string()))?
         .clone();
-    let base = Wallets::find()
+    let base = Wallet::find()
         .filter(wallet::Column::Addr.eq(&addr))
         .one(&ctx.db)
         .await?
@@ -48,7 +48,7 @@ pub async fn update_balance(
     State(ctx): State<AppContext>,
     Json(params): Json<UpdateWallet>,
 ) -> Result<Json<ModelResp<WalletResponse>>> {
-    let mut base: wallet::Model = Wallets::find()
+    let mut base: wallet::Model = Wallet::find()
         .filter(wallet::Column::Addr.eq(&params.addr))
         .one(&ctx.db)
         .await?
@@ -64,7 +64,7 @@ pub async fn update_status(
     State(ctx): State<AppContext>,
     Json(params): Json<UpdateWallet>,
 ) -> Result<Json<ModelResp<WalletResponse>>> {
-    let mut base: wallet::Model = Wallets::find()
+    let mut base: wallet::Model = Wallet::find()
         .filter(wallet::Column::Addr.eq(&params.addr))
         .one(&ctx.db)
         .await?

@@ -116,12 +116,12 @@ async fn transation_process(
         loop {
             // 1.获取两个钱包的信息。
             // let tran = params.new(&event_id);
-            let from_wallet = Wallets::find()
+            let from_wallet = Wallet::find()
                 .filter(wallet::Column::Addr.eq(&from_addr))
                 .one(db)
                 .await?;
 
-            let to_wallet = Wallets::find()
+            let to_wallet = Wallet::find()
                 .filter(wallet::Column::Addr.eq(&to_addr))
                 .one(db)
                 .await?;
@@ -218,7 +218,7 @@ async fn transation_process(
                     ele,
                     json!({}),
                 );
-                Bills::insert_many(bill_actives).exec(db).await?;
+                Bill::insert_many(bill_actives).exec(db).await?;
                 // 6.交易结束。
                 tracing::info!("交易成功 event_id: {}", &event_id);
                 break;

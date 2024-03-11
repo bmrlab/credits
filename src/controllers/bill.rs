@@ -5,7 +5,7 @@ use sea_orm::{ColumnTrait, Condition, QueryFilter};
 
 use crate::{
     models::{
-        _entities::{bill, prelude::Bills},
+        _entities::{bill, prelude::Bill},
         time_util::string_to_date_time,
     },
     views::{
@@ -27,7 +27,7 @@ pub async fn history(
         ));
     };
 
-    let sql = Bills::find().filter(
+    let sql = Bill::find().filter(
         Condition::all()
             .add(bill::Column::FromAddr.eq(&params.addr))
             .add(bill::Column::CreatedAt.gte(string_to_date_time(&start_time)))

@@ -1,7 +1,7 @@
 use chrono::{TimeZone, Utc};
 use credits::{
     app::App,
-    models::_entities::transaction_events::{self},
+    models::_entities::transaction_event::{self},
 };
 use eyre::Context;
 #[allow(unused_imports)]
@@ -29,7 +29,7 @@ async fn main() -> eyre::Result<()> {
 
     let mut cursor = my_coll.find(None, None).await?;
     while cursor.advance().await? {
-        let mut tran = transaction_events::ActiveModel {
+        let mut tran = transaction_event::ActiveModel {
             ..Default::default()
         };
 
@@ -45,7 +45,7 @@ async fn main() -> eyre::Result<()> {
                 tran.id = Set(r.to_owned());
             }
         }
-        let temp = transaction_events::Entity::find_by_id(id)
+        let temp = transaction_event::Entity::find_by_id(id)
             .one(&ctx.db)
             .await
             .unwrap();

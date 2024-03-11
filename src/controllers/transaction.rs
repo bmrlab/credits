@@ -15,6 +15,7 @@ use crate::{
         transaction_event_type::{self, INCOME, PAYMENT, TE_TYPE_RECOVERY},
     },
     views::{
+        callback::CallbackRequest,
         params_error,
         response::ModelResp,
         transaction::{
@@ -29,7 +30,7 @@ pub async fn api_exec_recovery(
     Json(params): Json<RecoveryInExecute>,
 ) -> Result<Json<ModelResp<TransactionsResp>>> {
     let param = params.convert_to_trans_item();
-    let event_id = transation_process(&ctx.db, param, params.trace_id).await?;
+    let event_id = transation_process(&ctx.db, param, params.trace_id, params.callback_url).await?;
     format::json(ModelResp::success(TransactionsResp::new(vec![event_id])))
 }
 
@@ -40,7 +41,8 @@ pub async fn api_exec_batch_trans(
     let trace_id = params.trace_id;
     let mut res: Vec<String> = Vec::new();
     for ele in params.trans {
-        let event_id = transation_process(&ctx.db, ele, trace_id.clone()).await?;
+        let event_id =
+            transation_process(&ctx.db, ele, trace_id.clone(), params.callback_url.clone()).await?;
         res.push(event_id);
     }
     format::json(ModelResp::success(TransactionsResp::new(res)))
@@ -54,8 +56,8 @@ pub async fn api_query_event(
         .get("event_id")
         .ok_or_else(|| params_error("event_id is empty".to_string()))?
         .clone();
-    let models = transaction_events::Entity::find()
-        .filter(transaction_events::Column::TraceId.eq(&event_id))
+    let models = transaction_event::Entity::find()
+        .filter(transaction_event::Column::TraceId.eq(&event_id))
         .all(&ctx.db)
         .await?;
     let res = models
@@ -73,8 +75,8 @@ pub async fn api_query_event_by_trace_id(
         .get("trace_id")
         .ok_or_else(|| params_error("trace_id is empty".to_string()))?
         .clone();
-    let models = transaction_events::Entity::find()
-        .filter(transaction_events::Column::TraceId.eq(&trace_id))
+    let models = transaction_event::Entity::find()
+        .filter(transaction_event::Column::TraceId.eq(&trace_id))
         .all(&ctx.db)
         .await?;
     let res = models
@@ -97,6 +99,7 @@ async fn transation_process(
     db: &sea_orm::prelude::DatabaseConnection,
     params: TransItem,
     trace_id: String,
+    callback_url: String,
 ) -> Result<String> {
     tracing::info!("发起交易 params: {:?}", &params);
     let params_clone = params.clone();
@@ -110,6 +113,8 @@ async fn transation_process(
         &event_id,
         &events_type
     );
+    let mut callback_event_model: Vec<transaction_event::Model> = Vec::new();
+
     for ele in events_type {
         let direction = transaction_event_type::get_direction(ele);
 
@@ -127,12 +132,13 @@ async fn transation_process(
                 .await?;
 
             // 2.判断两个钱包余额是否支持交易，不支持，交易失败，记录事件交易信息。交易结束。
-            let mut transaction_active: transaction_events::ActiveModel = build_transaction(
+            let mut transaction_active: transaction_event::ActiveModel = build_transaction(
                 &from_wallet,
                 &to_wallet,
                 &params,
                 direction,
                 trace_id.clone(),
+                callback_url.clone(),
             );
             // 金额回收 逻辑
             if ele == TE_TYPE_RECOVERY {
@@ -153,7 +159,14 @@ async fn transation_process(
                     .as_ref()
                     .clone()
                     .ok_or_else(|| Error::NotFound)?;
-                transaction_active.insert(db).await?;
+                // 发送callback
+                transaction_active.status_msg = Set(Some("failed".to_string()));
+                let model = transaction_active.insert(db).await?;
+
+                callback_event_model.push(model.clone());
+                let callback_req =
+                    CallbackRequest::new("fail".to_string(), msg.clone(), callback_event_model);
+                callback_process(callback_req, callback_url).await;
                 return Err(Error::CustomError(
                     StatusCode::BAD_REQUEST,
                     ErrorDetail::new("bad_request", &msg),
@@ -207,7 +220,9 @@ async fn transation_process(
                 // 5.事件交易信息，两个钱包的账单信息存储。
                 transaction_active.state = Set(10);
                 transaction_active.status_msg = Set(Some("success".to_string()));
-                transaction_active.insert(db).await?;
+
+                let model = transaction_active.insert(db).await?;
+                callback_event_model.push(model.clone());
                 let bill_actives = build_bill_actives(
                     &event_id,
                     &from_addr,
@@ -229,8 +244,24 @@ async fn transation_process(
         }
     }
     tracing::info!("交易结束 event_id: {}", &event_id);
+    // 发送callback
+    let callback_req =
+        CallbackRequest::new("success".to_string(), "".to_string(), callback_event_model);
+    callback_process(callback_req, callback_url).await;
 
     Ok(event_id)
+}
+
+async fn callback_process(callback_req: CallbackRequest, callback_url: String) {
+    tracing::info!("callback_process callback_req: {:?}", callback_req);
+    let client = reqwest::Client::new();
+    let res = client
+        .post(callback_url)
+        .json(&callback_req)
+        .send()
+        .await
+        .unwrap();
+    tracing::info!("callback_process res: {:?}", res);
 }
 
 fn get_uuid() -> String {
@@ -284,8 +315,9 @@ fn build_transaction(
     param: &TransItem,
     direction: i8,
     trace_id: String,
-) -> transaction_events::ActiveModel {
-    let mut tran_mode_active: transaction_events::ActiveModel = param.new(trace_id);
+    callback_url: String,
+) -> transaction_event::ActiveModel {
+    let mut tran_mode_active: transaction_event::ActiveModel = param.new(trace_id, callback_url);
     tran_mode_active.direction = Set(direction);
     tran_mode_active.state = Set(0);
 

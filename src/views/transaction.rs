@@ -1,5 +1,5 @@
 use crate::models::{
-    _entities::transaction_events,
+    _entities::transaction_event,
     transaction_event_type::{self, TE_TYPE_RECOVERY},
 };
 use sea_orm::{prelude::Decimal, Set};
@@ -15,15 +15,16 @@ pub struct TransItem {
 }
 
 impl TransItem {
-    pub fn new(&self, trace_id: String) -> transaction_events::ActiveModel {
+    pub fn new(&self, trace_id: String, callback_url: String) -> transaction_event::ActiveModel {
         let event_type = self.event_type.clone();
         transaction_event_type::check_event_type(&event_type);
-        transaction_events::ActiveModel {
+        transaction_event::ActiveModel {
             from_addr: Set(Some(self.from_addr.clone())),
             to_addr: Set(Some(self.to_addr.clone())),
             amount: Set(self.amount.clone()),
             trace_id: Set(trace_id.clone()),
             state: Set(10),
+            callback_url: Set(Some(callback_url.clone())),
             event_type: Set(event_type),
             info: Set(Some(self.info.clone())),
             ..Default::default()
@@ -35,7 +36,7 @@ impl TransItem {
 pub struct TransItemBatchReq {
     pub trans: Vec<TransItem>,
     pub trace_id: String,
-    pub callback_url: Option<String>,
+    pub callback_url: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -64,6 +65,7 @@ pub struct RecoveryInExecute {
     pub to_addr: String,
     pub trace_id: String,
     pub info: serde_json::Value,
+    pub callback_url: String,
 }
 
 impl RecoveryInExecute {
@@ -94,7 +96,7 @@ pub struct TransactionDetailResp {
 }
 
 impl TransactionDetailResp {
-    pub fn new(model: &transaction_events::Model) -> Self {
+    pub fn new(model: &transaction_event::Model) -> Self {
         let mut status_msg = "";
         if let Some(msg) = &model.status_msg {
             status_msg = msg;

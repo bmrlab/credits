@@ -3,5 +3,5 @@
 pub mod prelude;
 
 pub mod bill;
-pub mod transaction_events;
+pub mod transaction_event;
 pub mod wallet;

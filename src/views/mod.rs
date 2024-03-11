@@ -9,6 +9,8 @@ pub mod bill;
 
 pub mod transaction;
 
+pub mod callback;
+
 pub fn params_error(desc: String) -> Error {
     Error::CustomError(
         StatusCode::BAD_REQUEST,

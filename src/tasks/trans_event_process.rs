@@ -9,7 +9,7 @@ use mongodb::{
 use sea_orm::prelude::Decimal;
 use serde_json::Value as Json;
 
-use crate::models::_entities::transaction_events;
+use crate::models::_entities::transaction_event;
 
 pub struct TransEventProcess;
 #[async_trait]
@@ -28,12 +28,12 @@ impl Task for TransEventProcess {
         println!("uri = {:?}", uri);
         let client = Client::with_uri_str(uri).await.unwrap();
         // Get a handle on the movies collection
-        let database = client.database("damaigc-credits-billing");
+        let database = client.database("muse-credits-billing");
         let my_coll: Collection<Document> = database.collection("transaction_event");
 
         let mut cursor = my_coll.find(None, None).await.unwrap();
         while cursor.advance().await.unwrap() {
-            let mut tran = transaction_events::ActiveModel {
+            let mut tran = transaction_event::ActiveModel {
                 ..Default::default()
             };
 
@@ -49,7 +49,7 @@ impl Task for TransEventProcess {
                     tran.id = Set(r.to_owned());
                 }
             }
-            let temp = transaction_events::Entity::find_by_id(id)
+            let temp = transaction_event::Entity::find_by_id(id)
                 .one(&ctx.db)
                 .await
                 .unwrap();
@@ -138,7 +138,7 @@ impl Task for TransEventProcess {
                             Set(Utc.timestamp_millis_opt(r.timestamp_millis()).unwrap());
                     }
                 }
-                println!("{:?}", &tran);
+                println!("需要存储的数据： {:?}", &tran);
                 println!("开始转储------");
                 tran.insert(&ctx.db).await.unwrap();
             }

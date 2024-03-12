@@ -12,14 +12,17 @@ FROM rust:1.74-slim as builder
 
 WORKDIR /usr/src/
 
-RUN mkdir ~/.cargo/ && touch ~/.cargo/config \
-    && echo '[source.crates-io]' > ~/.cargo/config \
-    && echo "replace-with = 'mirror'"  >> ~/.cargo/config \
-    && echo '[source.mirror]' > ~/.cargo/config \
-    && echo 'registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"'  >> ~/.cargo/config 
 
+RUN mkdir -p /root/.cargo \
+    && echo '[source.crates-io]'> /root/.cargo/config \
+    && echo 'replace-with = "tuna"'> /root/.cargo/config \
+    && echo '[source.tuna]'> /root/.cargo/config  \
+    && echo 'registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"'> /root/.cargo/config 
 
 COPY . .
+
+RUN sed -i "s@archive.ubuntu.com@mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list && \
+    sed -i "s@security.ubuntu.com@mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list
 
 RUN apt-get update && apt-get install -y libssl-dev pkg-config
 

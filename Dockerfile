@@ -13,21 +13,24 @@ RUN apt-get update && \
     apt-get install -y curl build-essential libssl-dev pkg-config
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
 ENV PATH="/root/.cargo/bin:${PATH}"
-COPY . .
+
 WORKDIR /usr/src/
+
+COPY . .
 
 RUN echo '[source.crates-io]' > ~/.cargo/config \
     && echo "replace-with = 'ustc'"  >> ~/.cargo/config \
     && echo '[source.ustc]' >> ~/.cargo/config \
     && echo 'registry = "git://mirrors.ustc.edu.cn/crates.io-index"'  >> ~/.cargo/config 
 
-
-
 RUN cargo build --release
 
+RUN MV /usr/src/config /usr/app/config
+RUN MV /usr/src/target/release/credits-cli /usr/app/credits-cli
 
 ENV start_params " "
 
 EXPOSE 8080
-CMD ["sh", "-c", "/usr/src/target/release/credits-cli task $task_params && /usr/src/target/release/credits-cli start"]
+CMD ["sh", "-c", "/usr/app/credits-cli task $task_params && /usr/app/credits-cli start"]

@@ -5,7 +5,7 @@
 # EXPOSE 8080
 # CMD ["sh", "-c", "/usr/app/credits-cli task ${task_params} && /usr/app/credits-cli start"]
 
-FROM dockerhub.tezign.com/tekton/cuda:11.7.0-cudnn8-runtime-ubuntu22.04 as base
+FROM dockerhub.tezign.com/tekton/cuda:11.7.0-cudnn8-runtime-ubuntu22.04
 # RUN sed -i "s@archive.ubuntu.com@mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list && \
 #     sed -i "s@security.ubuntu.com@mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list
 
@@ -26,10 +26,8 @@ RUN echo '[source.crates-io]' > ~/.cargo/config \
 
 RUN cargo build --release
 
-COPY /usr/src/config /usr/app/config
-COPY /usr/src/target/release/credits-cli /usr/app/credits-cli
 
 ENV start_params " "
 
 EXPOSE 8080
-CMD ["sh", "-c", "/usr/app/credits-cli task $task_params && /usr/app/credits-cli start"]
+CMD ["sh", "-c", "/usr/src/target/release/credits-cli task $task_params && /usr/src/target/release/credits-cli start"]

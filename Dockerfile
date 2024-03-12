@@ -4,10 +4,15 @@ WORKDIR /usr/src/
 
 COPY . .
 
-RUN sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/sources.list
-RUN cat /etc/apt/sources.list
-RUN rm -Rf /var/lib/apt/lists/*
-RUN apt-get update
+# RUN sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/sources.list
+# RUN cat /etc/apt/sources.list
+# RUN rm -Rf /var/lib/apt/lists/*
+# RUN apt-get update
+
+RUN echo "deb http://mirrors.aliyun.com/debian/ buster main" > /etc/apt/sources.list 
+# && echo "deb http://mirrors.aliyun.com/debian-security buster/updates main" >> /etc/apt/sources.list \
+# && echo "deb http://mirrors.aliyun.com/debian/ buster-updates main" >> /etc/apt/sources.list \
+# && echo "deb http://mirrors.aliyun.com/debian/ buster-backports main" >> /etc/apt/sources.list
 
 RUN apt-get install -y libssl-dev pkg-config
 
@@ -20,10 +25,8 @@ RUN cargo build --release
 
 FROM debian:bookworm-slim
 
-RUN sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/sources.list
-RUN cat /etc/apt/sources.list
-RUN rm -Rf /var/lib/apt/lists/*
-RUN apt-get update
+
+RUN sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/sources.list && rm -Rf /var/lib/apt/lists/* && apt-get update
 
 RUN apt-get install -y libc6 
 

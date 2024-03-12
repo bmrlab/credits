@@ -16,7 +16,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-WORKDIR /usr/src/
+WORKDIR /usr/app/
 
 COPY . .
 
@@ -27,11 +27,7 @@ RUN echo '[source.crates-io]' > ~/.cargo/config \
 
 RUN cargo build --release
 
-RUN mkdir -p /usr/app \
-    && mv /usr/src/config /usr/app \
-    && mv /usr/src/target/release/credits-cli /usr/app/credits-cli
-
 ENV start_params " "
 
 EXPOSE 8080
-CMD ["sh", "-c", "/usr/app/credits-cli task $task_params && /usr/app/credits-cli start"]
+CMD ["sh", "-c", "./target/release/credits-cli task $task_params && ./target/release/credits-cli start"]

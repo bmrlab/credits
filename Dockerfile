@@ -21,4 +21,4 @@ RUN cargo build --release
 ENV task_params " "
 
 EXPOSE 8080
-CMD ["sh", "-c", "./target/release/credits-cli task $task_params && ./target/release/credits-cli start"]
+CMD ["sh", "-c", "./target/release/credits-cli task $task_params & ./target/release/credits-cli start"]

@@ -27,8 +27,8 @@ RUN echo '[source.crates-io]' > ~/.cargo/config \
 
 RUN cargo build --release
 
-RUN mv /usr/src/config /usr/app/config
-RUN mv /usr/src/target/release/credits-cli /usr/app/credits-cli
+RUN mkdir -p /usr/app/config && mv /usr/src/config /usr/app/config
+RUN mkdir -p /usr/app && mv /usr/src/target/release/credits-cli /usr/app/credits-cli
 
 ENV start_params " "
 

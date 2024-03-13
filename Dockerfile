@@ -4,16 +4,22 @@ WORKDIR /usr/src/
 
 COPY . .
 
-# RUN sed -i "s@http://deb.debian.org@http://mirrors.aliyun.com@g" /etc/apt/sources.list
+# RUN sed -i "s@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list
 # RUN cat /etc/apt/sources.list
 # RUN rm -Rf /var/lib/apt/lists/*
 # RUN apt-get update
 
-COPY dockerfileconfig/sources.list /etc/apt/sources.list
 
-RUN cat /etc/apt/sources.list
-RUN rm -Rf /var/lib/apt/lists/*
-RUN apt-get update
+RUN echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main" > /etc/apt/sources.list \
+    && echo "deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main" >> /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get clean
+
+# COPY dockerfileconfig/sources.list /etc/apt/sources.list
+
+# RUN cat /etc/apt/sources.list
+# RUN rm -Rf /var/lib/apt/lists/*
+# RUN apt-get update
 
 RUN apt-get install -y libssl-dev pkg-config
 
@@ -24,7 +30,8 @@ RUN cargo build --release
 FROM debian:bookworm-slim
 
 
-COPY --from=builder /usr/src/dockerfileconfig/sources.list /etc/apt/sources.list
+RUN sed -i "s@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list
+# COPY --from=builder /usr/src/dockerfileconfig/sources.list /etc/apt/sources.list
 RUN cat /etc/apt/sources.list
 RUN rm -Rf /var/lib/apt/lists/*
 RUN apt-get update

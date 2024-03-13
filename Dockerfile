@@ -5,7 +5,6 @@ WORKDIR /usr/src/
 COPY . .
 
 RUN sed -i "s@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/debian.sources
-RUN cat /etc/apt/sources.list.d/debian.sources
 RUN rm -Rf /var/lib/apt/lists/*
 RUN apt-get update
 
@@ -16,10 +15,10 @@ RUN cargo build --release
 FROM debian:bookworm-slim
 
 RUN sed -i "s@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/debian.sources
-RUN cat /etc/apt/sources.list.d/debian.sources
 RUN rm -Rf /var/lib/apt/lists/*
 RUN apt-get update
 
+RUN apt-get install -y libc6 
 
 WORKDIR /usr/app
 

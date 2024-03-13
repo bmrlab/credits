@@ -23,7 +23,7 @@ RUN echo "deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main" > /etc/a
 
 RUN apt-get install -y libssl-dev pkg-config
 
-COPY dockerfileconfig/config ~/.cargo/config 
+COPY dockerfileconfig/config /root/.cargo/config 
 
 RUN cargo build --release
 

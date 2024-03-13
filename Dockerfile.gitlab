@@ -20,6 +20,9 @@
 
 FROM rust:1.74-slim as builder
 
+RUN rustup target add x86_64-unknown-linux-musl
+RUN apt update && apt install -y musl-tools musl-dev
+
 WORKDIR /usr/src/
 
 COPY . .
@@ -45,9 +48,9 @@ COPY . .
 
 # COPY dockerfileconfig/config /root/.cargo/config 
 
-RUN cargo build --release
+RUN cargo build --target x86_64-unknown-linux-musl --release
 
-FROM debian:buster-slim
+FROM alpine
 
 
 # RUN sed -i "s@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list

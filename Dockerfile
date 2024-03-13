@@ -4,6 +4,7 @@ WORKDIR /usr/src/
 
 COPY . .
 
+# debian  source.list 地址换到了 /etc/apt/sources.list.d/debian.sources
 RUN sed -i "s@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/debian.sources
 RUN rm -Rf /var/lib/apt/lists/*
 RUN apt-get update
@@ -14,10 +15,10 @@ RUN cargo build --release
 
 FROM debian:bookworm-slim
 
-RUN sed -i "s@http://deb.debian.org@https://mirrors.tuna.tsinghua.edu.cn@g" /etc/apt/sources.list.d/debian.sources
+# debian:bookworm-slim 清华大学数据源没有证书，需要安装证书麻烦。 使用科大源
+RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
 RUN rm -Rf /var/lib/apt/lists/*
 RUN apt-get update
-
 RUN apt-get install -y libc6 
 
 WORKDIR /usr/app
@@ -30,3 +31,5 @@ ENV task_params=" "
 
 EXPOSE 8080
 CMD ["sh", "-c", "./credits-cli task $task_params && ./credits-cli start"]
+
+

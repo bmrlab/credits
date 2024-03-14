@@ -1,6 +1,6 @@
 FROM rust:1.74-slim
 
-WORKDIR /usr/src/
+WORKDIR /app
 
 COPY . .
 
@@ -13,11 +13,12 @@ RUN apt-get install -y libssl-dev pkg-config
 
 RUN cargo build --release
 
-RUN mv /usr/src/target/release/credits-cli /usr/src/credits-cli
+RUN mv /app/target/release/credits-cli /app/credits-cli
+RUN find . -mindepth 1 -maxdepth 1 ! -name 'credits-cli' ! -name 'config' -exec rm -rf {} +
 
 ENV task_params=" "
 EXPOSE 8080
-CMD ["sh", "-c", "./credits-cli task $task_params && ./credits-cli start"]
+CMD ["sh", "-c", "./credits-cli task $task_params & ./credits-cli start"]
 
 # FROM debian:bookworm-slim
 

@@ -19,7 +19,8 @@ FROM debian:bookworm-slim
 RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
 RUN rm -Rf /var/lib/apt/lists/*
 RUN apt-get update
-RUN apt-get install -y libc6 
+# RUN apt-get install -y libc6 libssl-dev 
+RUN apt-get install -y libssl-dev pkg-config ca-certificates
 
 WORKDIR /usr/app
 

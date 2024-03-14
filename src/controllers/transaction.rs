@@ -105,7 +105,6 @@ async fn transation_process(
     let params_clone = params.clone();
     let from_addr = params_clone.from_addr;
     let to_addr = params_clone.to_addr;
-    let mut amount = params_clone.amount;
     let events_type = transaction_event_type::split_complex_event(&params_clone.event_type);
     let event_id = get_uuid();
     tracing::info!(
@@ -116,6 +115,7 @@ async fn transation_process(
     let mut callback_event_model: Vec<transaction_event::Model> = Vec::new();
 
     for ele in events_type {
+        let mut amount = params_clone.amount;
         let direction = transaction_event_type::get_direction(ele);
 
         loop {

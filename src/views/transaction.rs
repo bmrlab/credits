@@ -15,13 +15,18 @@ pub struct TransItem {
 }
 
 impl TransItem {
-    pub fn new(&self, trace_id: String, callback_url: String) -> transaction_event::ActiveModel {
+    pub fn new(
+        &self,
+        trace_id: String,
+        callback_url: String,
+        amount: Decimal,
+    ) -> transaction_event::ActiveModel {
         let event_type = self.event_type.clone();
         transaction_event_type::check_event_type(&event_type);
         transaction_event::ActiveModel {
             from_addr: Set(Some(self.from_addr.clone())),
             to_addr: Set(Some(self.to_addr.clone())),
-            amount: Set(self.amount.clone()),
+            amount: Set(amount),
             trace_id: Set(trace_id.clone()),
             state: Set(10),
             callback_url: Set(Some(callback_url.clone())),

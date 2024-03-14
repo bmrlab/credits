@@ -130,6 +130,14 @@ async fn transation_process(
                 .filter(wallet::Column::Addr.eq(&to_addr))
                 .one(db)
                 .await?;
+            // 金额回收 逻辑
+            if ele == TE_TYPE_RECOVERY {
+                amount = to_wallet
+                    .as_ref()
+                    .ok_or_else(|| Error::NotFound)?
+                    .balance
+                    .clone();
+            }
 
             // 2.判断两个钱包余额是否支持交易，不支持，交易失败，记录事件交易信息。交易结束。
             let mut transaction_active: transaction_event::ActiveModel = build_transaction(
@@ -139,16 +147,9 @@ async fn transation_process(
                 direction,
                 trace_id.clone(),
                 callback_url.clone(),
+                amount,
             );
-            // 金额回收 逻辑
-            if ele == TE_TYPE_RECOVERY {
-                amount = to_wallet
-                    .as_ref()
-                    .ok_or_else(|| Error::NotFound)?
-                    .balance
-                    .clone();
-                transaction_active.amount = Set(amount.clone());
-            }
+
             transaction_active.event_id = Set(event_id.clone());
             let state_value = transaction_active.clone().state.as_ref().clone();
 
@@ -316,8 +317,10 @@ fn build_transaction(
     direction: i8,
     trace_id: String,
     callback_url: String,
+    amount: Decimal,
 ) -> transaction_event::ActiveModel {
-    let mut tran_mode_active: transaction_event::ActiveModel = param.new(trace_id, callback_url);
+    let mut tran_mode_active: transaction_event::ActiveModel =
+        param.new(trace_id, callback_url, amount);
     tran_mode_active.direction = Set(direction);
     tran_mode_active.state = Set(0);
 
@@ -338,7 +341,7 @@ fn build_transaction(
             return tran_mode_active;
         }
         if direction == -1 {
-            if v.balance < param.amount {
+            if v.balance < amount {
                 tran_mode_active.state = Set(-1);
                 tran_mode_active.status_msg = Set(Some(format!("钱包: {} 余额不足", from_addr)));
                 return tran_mode_active;
@@ -358,7 +361,7 @@ fn build_transaction(
             return tran_mode_active;
         }
         if direction == 1 {
-            if v.balance < param.amount {
+            if v.balance < amount {
                 tran_mode_active.state = Set(-1);
                 tran_mode_active.status_msg = Set(Some(format!("钱包: {} 余额不足", to_addr)));
                 return tran_mode_active;

@@ -13,10 +13,9 @@ RUN apt-get install -y libssl-dev pkg-config
 
 RUN cargo build --release
 
+RUN mv /usr/src/target/release/credits-cli /usr/src/credits-cli
+
 ENV task_params=" "
-
-COPY  /usr/src/target/release/credits-cli /usr/src/credits-cli
-
 EXPOSE 8080
 CMD ["sh", "-c", "./credits-cli task $task_params && ./credits-cli start"]
 

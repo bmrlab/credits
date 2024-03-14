@@ -255,14 +255,16 @@ async fn transation_process(
 
 async fn callback_process(callback_req: CallbackRequest, callback_url: String) {
     tracing::info!("callback_process callback_req: {:?}", callback_req);
-    let client = reqwest::Client::new();
-    let res = client
-        .post(callback_url)
-        .json(&callback_req)
-        .send()
-        .await
-        .unwrap();
-    tracing::info!("callback_process res: {:?}", res);
+    if !callback_url.is_empty() {
+        let client = reqwest::Client::new();
+        let res = client
+            .post(callback_url)
+            .json(&callback_req)
+            .send()
+            .await
+            .unwrap();
+        tracing::info!("callback_process res: {:?}", res);
+    }
 }
 
 fn get_uuid() -> String {

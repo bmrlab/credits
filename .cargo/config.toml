@@ -4,8 +4,7 @@ playground = "run --example playground"
 
 
 [source.crates-io]
-replace-with = 'rsproxy'
+replace-with = 'mirror'
 
-# 字节跳动
-[source.rsproxy]
-registry = "https://rsproxy.cn/crates.io-index"
+[source.mirror]
+registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"

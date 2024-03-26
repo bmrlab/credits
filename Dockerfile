@@ -16,9 +16,17 @@ RUN cargo build --release
 RUN mv /app/target/release/credits-cli /app/credits-cli
 RUN find . -mindepth 1 -maxdepth 1 ! -name 'credits-cli' ! -name 'config' -exec rm -rf {} +
 
-ENV task_params=" "
+# ENV task_params=" "
+# EXPOSE 8080
+# CMD ["sh", "-c", "./credits-cli task $task_params & ./credits-cli start"]
+
+ENV task_params_dev=" "
+ENV task_params_pro=" "
+
 EXPOSE 8080
-CMD ["sh", "-c", "./credits-cli task $task_params & ./credits-cli start"]
+
+CMD ["sh", "-c", "if [ -n \"$DATABASE_URL\" ]; then ./credits-cli task $task_params_dev & ./credits-cli start; else ./credits-cli task $task_params_pro & ./credits-cli start --environment production; fi"]
+
 
 # FROM debian:bookworm-slim
 

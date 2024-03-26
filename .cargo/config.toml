@@ -3,9 +3,16 @@ loco = "run --"
 playground = "run --example playground"
 
 
-[source.crates-io]
-replace-with = 'rsproxy'
+# [source.crates-io]
+# replace-with = 'rsproxy'
 
-# 字节跳动
-[source.rsproxy]
-registry = "https://rsproxy.cn/crates.io-index"
+# # 字节跳动
+# [source.rsproxy]
+# registry = "https://rsproxy.cn/crates.io-index"
+
+
+[source.crates-io]
+replace-with = 'mirror'
+
+[source.mirror]
+registry = "https://mirrors.tuna.tsinghua.edu.cn/git/crates.io-index.git"

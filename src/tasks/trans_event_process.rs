@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use chrono::{TimeZone, Utc};
 use loco_rs::prelude::*;
 use mongodb::{
-    bson::{Bson, Document},
+    bson::{doc, Bson, Document},
     Client, Collection,
 };
 use sea_orm::prelude::Decimal;
@@ -30,8 +30,8 @@ impl Task for TransEventProcess {
         // Get a handle on the movies collection
         let database = client.database("muse-credits-billing");
         let my_coll: Collection<Document> = database.collection("transaction_event");
-
-        let mut cursor = my_coll.find(None, None).await.unwrap();
+        let filter = doc! { "event_exec_id": { "$gt": 0 } };
+        let mut cursor = my_coll.find(filter, None).await.unwrap();
         while cursor.advance().await.unwrap() {
             let mut tran = transaction_event::ActiveModel {
                 ..Default::default()
@@ -45,10 +45,8 @@ impl Task for TransEventProcess {
             let event_exec_id_opt = doc.get("event_exec_id");
             if let Some(v) = event_exec_id_opt {
                 if let Bson::Int32(r) = v {
-                    if *r > 0 {
-                        id = r.clone() as u64;
-                        tran.id = Set(r.to_owned() as u64);
-                    }
+                    id = r.clone() as u64;
+                    tran.id = Set(r.to_owned() as u64);
                 }
             }
             let temp = transaction_event::Entity::find_by_id(id)

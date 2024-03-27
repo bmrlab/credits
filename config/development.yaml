@@ -12,7 +12,7 @@ logger:
   format: pretty
   # By default the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
   # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
-  override_filter: trace
+  # override_filter: trace
 
 # Web server configuration
 server:
@@ -64,7 +64,7 @@ database:
   # Database connection URI
   uri: {{ get_env(name="DATABASE_URL", default="mysql://root:123456@192.168.20.44:3306/account") }}
   # When enabled, the sql query will be logged.
-  enable_logging: true
+  enable_logging: false
   # Set the timeout duration when acquiring a connection.
   connect_timeout: 500
   # Set the idle duration before closing a connection.

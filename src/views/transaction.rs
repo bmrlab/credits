@@ -88,7 +88,7 @@ impl RecoveryInExecute {
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct TransactionDetailResp {
     pub created_at: String,
-    pub id: i32,
+    pub id: u32,
     pub event_id: String,
     pub from_addr: String,
     pub to_addr: String,

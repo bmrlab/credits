@@ -25,7 +25,7 @@ ENV task_params_pro=" "
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "if [ -n \"$DATABASE_URL\" ]; then ./credits-cli task $task_params_dev & ./credits-cli start; else ./credits-cli task $task_params_pro & ./credits-cli start --environment production; fi"]
+CMD ["sh", "-c", "./credits-cli task $task_params & ./credits-cli start"]
 
 
 # FROM debian:bookworm-slim

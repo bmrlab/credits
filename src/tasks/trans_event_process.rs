@@ -45,8 +45,8 @@ impl Task for TransEventProcess {
             let event_exec_id_opt = doc.get("event_exec_id");
             if let Some(v) = event_exec_id_opt {
                 if let Bson::Int32(r) = v {
-                    id = r.clone() as u32;
-                    tran.id = Set(r.to_owned() as u32);
+                    id = r.clone();
+                    tran.id = Set(r.to_owned());
                 }
             }
             let temp = transaction_event::Entity::find_by_id(id)

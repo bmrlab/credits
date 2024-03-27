@@ -9,7 +9,7 @@ pub struct Model {
     pub created_at: DateTimeUtc,
     pub updated_at: DateTimeUtc,
     #[sea_orm(primary_key)]
-    pub id: i32,
+    pub id: u64,
     pub event_id: String,
     pub from_addr: Option<String>,
     pub to_addr: Option<String>,

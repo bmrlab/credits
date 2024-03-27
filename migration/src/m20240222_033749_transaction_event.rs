@@ -9,7 +9,7 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 table_auto(TransactionEvent::Table)
-                    .col(pk_auto(TransactionEvent::Id))
+                    .col(pk_auto(TransactionEvent::Id).big_unsigned())
                     .col(string(TransactionEvent::EventId))
                     .col(string(TransactionEvent::TraceId))
                     .col(string_null(TransactionEvent::FromAddr))

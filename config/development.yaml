@@ -12,7 +12,7 @@ logger:
   format: pretty
   # By default the logger has filtering only logs that came from your code or logs that came from `loco` framework. to see all third party libraries
   # Uncomment the line below to override to see all third party libraries you can enable this config and override the logger filters.
-  # override_filter: trace
+  override_filter: trace
 
 # Web server configuration
 server:
@@ -62,9 +62,9 @@ server:
 # Database Configuration
 database:
   # Database connection URI
-  uri: {{ get_env(name="DATABASE_URL", default="mysql://root:123456@192.168.20.44:3306/muse_integrator") }}
+  uri: {{ get_env(name="DATABASE_URL", default="mysql://root:123456@192.168.20.44:3306/account") }}
   # When enabled, the sql query will be logged.
-  enable_logging: false
+  enable_logging: true
   # Set the timeout duration when acquiring a connection.
   connect_timeout: 500
   # Set the idle duration before closing a connection.
@@ -74,7 +74,7 @@ database:
   # Maximum number of connections for a pool.
   max_connections: 1
   # Run migration up when application loaded
-  auto_migrate: true
+  auto_migrate: false
   # Truncate database when application loaded. This is a dangerous operation, make sure that you using this flag only on dev environments or test mode
   dangerously_truncate: false
   # Recreating schema when application loaded.  This is a dangerous operation, make sure that you using this flag only on dev environments or test mode

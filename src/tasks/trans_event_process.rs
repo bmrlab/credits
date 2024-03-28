@@ -4,6 +4,7 @@ use chrono::{TimeZone, Utc};
 use loco_rs::prelude::*;
 use mongodb::{
     bson::{doc, Bson, Document},
+    options::FindOptions,
     Client, Collection,
 };
 use sea_orm::prelude::Decimal;
@@ -29,9 +30,10 @@ impl Task for TransEventProcess {
         let client = Client::with_uri_str(uri).await.unwrap();
         // Get a handle on the movies collection
         let database = client.database("muse-credits-billing");
+        let options = FindOptions::builder().no_cursor_timeout(true).build();
         let my_coll: Collection<Document> = database.collection("transaction_event");
-        let filter = doc! { "event_exec_id": { "$gt": 0 } };
-        let mut cursor = my_coll.find(filter, None).await.unwrap();
+        let filter = doc! { "event_exec_id": { "$gt": 148384 } };
+        let mut cursor = my_coll.find(filter, options).await.unwrap();
         while cursor.advance().await.unwrap() {
             let mut tran = transaction_event::ActiveModel {
                 ..Default::default()

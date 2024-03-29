@@ -25,7 +25,7 @@ ENV task_params_pro=" "
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "./credits-cli task $task_params & ./credits-cli start"]
+CMD ["sh", "-c", "./credits-cli start"]
 
 
 # FROM debian:bookworm-slim

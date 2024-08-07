@@ -1,4 +1,4 @@
-FROM rust:1.74-slim
+FROM dockerhub.tezign.com/tekton/rust:1.74-slim
 
 WORKDIR /app
 

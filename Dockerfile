@@ -14,7 +14,7 @@ RUN apt-get install -y libssl-dev pkg-config
 RUN cargo build --release
 
 RUN mv /app/target/release/credits-cli /app/credits-cli
-RUN find . -mindepth 1 -maxdepth 1 ! -name 'credits-cli' ! -name 'config' -exec rm -rf {} +
+# RUN find . -mindepth 1 -maxdepth 1 ! -name 'credits-cli' ! -name 'config' -exec rm -rf {} +
 
 # ENV task_params=" "
 # EXPOSE 8080

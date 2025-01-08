@@ -1,4 +1,4 @@
-name: YUM Backend Rust Server
+name: Build and Push Docker Image
 
 on:
   push:
@@ -31,14 +31,14 @@ jobs:
         echo "commit_short_hash=$commit_short_hash" >> $GITHUB_OUTPUT
         echo "build_version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
-    - name: Build and push YUM Backend
+    - name: Build and push
       uses: docker/build-push-action@v4
       with:
         context: ./
-        file: ./Dockerfile.gitlab
+        file: ./Dockerfile.github
         push: true
         tags: |
-          ghcr.io/bmrlab/muse-credits:latest
-          ghcr.io/bmrlab/muse-credits:${{ steps.vars.outputs.commit_short_hash }}
-          ghcr.io/bmrlab/muse-credits:${{ steps.vars.outputs.build_version }}
+          ghcr.io/bmrlab/museai-credits:latest
+          ghcr.io/bmrlab/museai-credits:${{ steps.vars.outputs.commit_short_hash }}
+          ghcr.io/bmrlab/museai-credits:${{ steps.vars.outputs.build_version }}
         platforms: linux/amd64
